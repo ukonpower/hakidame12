@@ -303,28 +303,28 @@ export class Renderer extends MXP.Entity {
 
 			// ui
 
-			gl.enable( gl.BLEND );
-			gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA );
+			// gl.enable( gl.BLEND );
+			// gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA );
 
-			this.renderCamera( "forward", cameraEntity, stack.ui, cameraComponent.renderTarget.uiBuffer, { uniforms: { uDeferredTexture: { value: cameraComponent.renderTarget.deferredBuffer.textures[ 1 ], type: '1i' } } }, false );
+			// this.renderCamera( "forward", cameraEntity, stack.ui, cameraComponent.renderTarget.uiBuffer, { uniforms: { uDeferredTexture: { value: cameraComponent.renderTarget.deferredBuffer.textures[ 1 ], type: '1i' } } }, false );
 
-			gl.disable( gl.BLEND );
+			// gl.disable( gl.BLEND );
 
 			// postprocess
 
-			const postprocess = cameraEntity.getComponent<MXP.PostProcess>( 'postprocess' );
+			// const postprocess = cameraEntity.getComponent<MXP.PostProcess>( 'postprocess' );
 
-			if ( postprocess ) {
+			// if ( postprocess ) {
 
-				this.renderPostProcess( postprocess, {
-					viewMatrix: cameraComponent.viewMatrix,
-					projectionMatrix: cameraComponent.projectionMatrix,
-					cameraMatrixWorld: cameraEntity.matrixWorld,
-					cameraNear: cameraComponent.near,
-					cameraFar: cameraComponent.far,
-				} );
+			// 	this.renderPostProcess( postprocess, {
+			// 		viewMatrix: cameraComponent.viewMatrix,
+			// 		projectionMatrix: cameraComponent.projectionMatrix,
+			// 		cameraMatrixWorld: cameraEntity.matrixWorld,
+			// 		cameraNear: cameraComponent.near,
+			// 		cameraFar: cameraComponent.far,
+			// 	} );
 
-			}
+			// }
 
 		}
 

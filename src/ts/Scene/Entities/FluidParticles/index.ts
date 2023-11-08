@@ -2,7 +2,7 @@ import * as MXP from 'maxpower';
 
 import * as GLP from 'glpower';
 
-import { gl, globalUniforms, midimix, mpkmini } from '~/ts/Globals';
+import { gl, globalUniforms } from '~/ts/Globals';
 
 import fluidParticlesVert from './shaders/fluidParticles.vs';
 import fluidParticlesFrag from './shaders/fluidParticles.fs';
@@ -20,14 +20,6 @@ export class FluidParticles extends MXP.Entity {
 		const count = new GLP.Vector( 128, 128 );
 
 		this.commonUniforms = GLP.UniformsUtils.merge( {
-			uMidi: {
-				value: midimix.vectorsLerped[ 1 ],
-				type: '4fv'
-			},
-			uMidi2: {
-				value: mpkmini.vectorsLerped[ 1 ],
-				type: '4fv'
-			},
 			uPause: {
 				value: 0,
 				type: '1f'
@@ -36,19 +28,6 @@ export class FluidParticles extends MXP.Entity {
 				value: 0,
 				type: "1f"
 			}
-		}, globalUniforms.audio );
-
-		/*-------------------------------
-			Midi
-		-------------------------------*/
-
-		midimix.on( "row1/1", ( value: number ) => {
-		} );
-
-		midimix.on( "row2/1", () => {
-
-			this.commonUniforms.uPause.value = 1.0 - this.commonUniforms.uPause.value;
-
 		} );
 
 		/*-------------------------------

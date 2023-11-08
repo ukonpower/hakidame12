@@ -1,18 +1,11 @@
 import * as GLP from 'glpower';
 import * as MXP from 'maxpower';
 
-import { animator, audio, bpm, gl, globalUniforms, lpd8, midimix, mpkmini, power } from '../Globals';
-
 import { MainCamera } from './Entities/MainCamera';
 import { Renderer } from './Renderer';
 import { createTextures } from './Textures';
-import { Common } from './Elements/Common';
-import { Part0 } from './Elements/Parts/Part0';
-import { Part1 } from './Elements/Parts/Part1';
-import { Part2 } from './Elements/Parts/Part2';
-import { Part3 } from './Elements/Parts/Part3';
-// import { Effect0 } from './Elements/Parts/Effect0';
-// import { Effect1 } from './Elements/Parts/Effect1';
+import { gl, power, globalUniforms } from '../Globals';
+import { Carpenter } from './Carpenter';
 
 type SceneUpdateParam = {
 	forceDraw: boolean
@@ -27,6 +20,8 @@ export class Scene extends GLP.EventEmitter {
 	private root: MXP.Entity;
 	private camera: MXP.Entity;
 	private renderer: Renderer;
+
+	private carpenter: Carpenter;
 
 	constructor() {
 
@@ -80,16 +75,9 @@ export class Scene extends GLP.EventEmitter {
 		this.camera.position.set( 0, 0, 4 );
 		this.root.add( this.camera );
 
-		// Wrold
+		// carpenter
 
-		this.root.add( new Common() );
-		this.root.add( new Part0() );
-		this.root.add( new Part1() );
-		this.root.add( new Part2() );
-		this.root.add( new Part3() );
-
-		// this.root.add( new Effect0() );
-		// this.root.add( new Effect1() );
+		this.carpenter = new Carpenter( this.root, this.camera );
 
 		// renderer
 
@@ -107,25 +95,12 @@ export class Scene extends GLP.EventEmitter {
 
 		globalUniforms.time.uTime.value = this.elapsedTime;
 		globalUniforms.time.uFractTime.value = this.elapsedTime;
-		globalUniforms.time.uTimeSeqPrev.value = globalUniforms.time.uTimeSeq.value;
 
 		const event: MXP.EntityUpdateEvent = {
 			time: this.elapsedTime,
 			deltaTime: this.deltaTime,
 			forceDraw: param && param.forceDraw
 		};
-
-		animator.update( this.deltaTime );
-
-		midimix.update( this.deltaTime );
-
-		mpkmini.update( this.deltaTime );
-
-		lpd8.update( this.deltaTime );
-
-		bpm.update( this.deltaTime );
-
-		audio.update( this.deltaTime );
 
 		const renderStack = this.root.update( event );
 

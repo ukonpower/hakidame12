@@ -1,7 +1,7 @@
 import * as GLP from 'glpower';
 import * as MXP from 'maxpower';
 
-import { gl, globalUniforms, lpd8, midimix, power } from "~/ts/Globals";
+import { gl, globalUniforms, power } from "~/ts/Globals";
 
 import fxaaFrag from './shaders/fxaa.fs';
 import bloomBlurFrag from './shaders/bloomBlur.fs';
@@ -17,9 +17,8 @@ import motionBlurNeighborFrag from './shaders/motionBlurNeighbor.fs';
 import motionBlurFrag from './shaders/motionBlur.fs';
 import ssCompositeFrag from './shaders/ssComposite.fs';
 import compositeFrag from './shaders/composite.fs';
-import { ShakeViewer } from '../../Components/ShakeViewer';
 import { RenderCamera, RenderCameraParam } from '~/ts/libs/maxpower/Component/Camera/RenderCamera';
-import { CameraControls } from '../../Components/CameraControls';
+import { ShakeViewer } from '../../Components/ShakeViewer';
 
 export class MainCamera extends MXP.Entity {
 
@@ -106,7 +105,6 @@ export class MainCamera extends MXP.Entity {
 		// components
 
 		this.cameraComponent = this.addComponent( "camera", new RenderCamera( param ) );
-		this.addComponent( 'cameraControls', new CameraControls() );
 		this.addComponent( 'shakeViewer', new ShakeViewer( 1.5, 1.0 ) );
 
 		// resolution
@@ -278,6 +276,7 @@ export class MainCamera extends MXP.Entity {
 					type: '1i'
 				},
 			} ),
+			renderTarget: null
 		} );
 
 		// dof
@@ -401,7 +400,7 @@ export class MainCamera extends MXP.Entity {
 			defines: {
 				"TILE": motionBlurTile,
 			},
-			renderTarget: param.renderTarget.uiBuffer
+			renderTarget: null
 		} );
 
 		// fxaa
@@ -535,18 +534,6 @@ export class MainCamera extends MXP.Entity {
 					value: 0,
 					type: "1f"
 				},
-				uMidi: {
-					value: midimix.vectorsLerped[ 5 ],
-					type: '4fv'
-				},
-				uMidi2: {
-					value: lpd8.vectorsLerped[ 1 ],
-					type: '4fv'
-				},
-				uMidiMaster: {
-					value: midimix.vectorsLerped[ 8 ],
-					type: '4fv'
-				},
 				uTitleTex: {
 					value: new GLP.GLPowerTexture( gl ).load( "/ttl.png" ),
 					type: '1i'
@@ -555,17 +542,11 @@ export class MainCamera extends MXP.Entity {
 					value: 0.0,
 					type: '1f'
 				}
-			}, globalUniforms.audio ),
+			} ),
 			defines: {
 				BLOOM_COUNT: this.bloomRenderCount.toString()
 			},
 			renderTarget: null
-		} );
-
-		midimix.on( 'row1/5', ( ) =>{
-
-			this.composite.uniforms.uTitleVis.value = 1.0 - this.composite.uniforms.uTitleVis.value;
-
 		} );
 
 		if ( import.meta.hot ) {
@@ -592,12 +573,12 @@ export class MainCamera extends MXP.Entity {
 				this.ssr,
 				this.ssao,
 				this.ssComposite,
-				this.dofCoc,
-				this.dofBokeh,
-				this.dofComposite,
-				this.motionBlurTile,
-				this.motionBlurNeighbor,
-				this.motionBlur,
+				// this.dofCoc,
+				// this.dofBokeh,
+				// this.dofComposite,
+				// this.motionBlurTile,
+				// this.motionBlurNeighbor,
+				// this.motionBlur,
 			]
 		} ) );
 

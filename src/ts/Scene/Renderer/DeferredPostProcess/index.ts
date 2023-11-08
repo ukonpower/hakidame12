@@ -1,9 +1,7 @@
-import * as GLP from 'glpower';
 import * as MXP from 'maxpower';
 
 import deferredShadingFrag from './shaders/deferredShading.fs';
 import { RenderCameraTarget } from '~/ts/libs/maxpower/Component/Camera/RenderCamera';
-import { globalUniforms } from '~/ts/Globals';
 
 export class DeferredPostProcess extends MXP.PostProcess {
 
@@ -14,12 +12,6 @@ export class DeferredPostProcess extends MXP.PostProcess {
 		const shading = new MXP.PostProcessPass( {
 			name: "deferredShading",
 			frag: MXP.hotGet( "deferredShading", deferredShadingFrag ),
-			uniforms: GLP.UniformsUtils.merge( {
-				uEnvTex: globalUniforms.tex.uEnvTex
-			} ),
-			defines: {
-				USE_ENV: ""
-			}
 		} );
 
 		super( { passes: [

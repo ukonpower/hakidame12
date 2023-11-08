@@ -1,66 +1,63 @@
 import * as GLP from 'glpower';
 import { canvas, gpuState } from './Globals';
 import { Scene } from "./Scene";
+import config from '../../config.json';
 
 class App {
 
-	// elms
-
-	private rootElm: HTMLElement;
-	private canvasWrapElm: HTMLElement;
-	private canvas: HTMLCanvasElement;
-
 	private scene: Scene;
+	private canvas: HTMLCanvasElement;
+	private cnavasContainer: HTMLElement;
+	private canvasWrap: HTMLElement;
 
 	constructor() {
 
-		/*-------------------------------
-			Element
-		-------------------------------*/
+		const elm = document.createElement( "div" );
+		document.body.appendChild( elm );
+		elm.innerHTML = `
+			<div class="cc">
+				<div class="cw"></div>
+			</div>
+			<h1>NO.${config.no}/${config.title || 'UNTITLED'}</h1>
+			<div class="text">
+				<br/>
+				DATE:${config.date}<br/>
+				<a href="../">../</a>
+			</div>
+		`;
 
-		document.title = "draw();";
+		document.title = `${config.no} | HAKIDAME`;
 
-		this.rootElm = document.createElement( 'div' );
-		this.rootElm.classList.add( 'r' );
-		document.body.appendChild( this.rootElm );
-
-		/*-------------------------------
-			Canvas
-		-------------------------------*/
-
-		this.canvasWrapElm = document.createElement( 'div' );
-		this.canvasWrapElm.classList.add( 'cw' );
-		this.rootElm.appendChild( this.canvasWrapElm );
+		this.canvasWrap = document.querySelector( '.cw' )!;
+		this.cnavasContainer = document.querySelector( '.cc' )!;
 
 		this.canvas = canvas;
-		this.canvasWrapElm.appendChild( this.canvas );
+		this.canvasWrap.appendChild( this.canvas );
 
-		this.canvasWrapElm.style.display = 'block';
-		this.canvasWrapElm.style.cursor = 'none';
-
-		/*-------------------------------
-			Scene
-		-------------------------------*/
+		// scene
 
 		this.scene = new Scene();
 
-		/*-------------------------------
-			Event
-		-------------------------------*/
+		// event
 
 		window.addEventListener( 'resize', this.resize.bind( this ) );
 
 		this.resize();
 
+		// animate
+
+		this.animate();
+
 		// gpustate
 
 		if ( process.env.NODE_ENV == 'development' ) {
 
-			if ( gpuState ) {
+			const debug = false;
+
+			if ( gpuState && debug ) {
 
 				const memoryElm = document.createElement( 'div' );
 				memoryElm.classList.add( "dev" );
-				memoryElm.style.pointerEvents = "none";
 				memoryElm.style.position = "absolute";
 				memoryElm.style.width = "50%";
 				memoryElm.style.maxWidth = "300px";
@@ -69,12 +66,10 @@ class App {
 				memoryElm.style.left = "0";
 				memoryElm.style.overflowY = 'auto';
 				memoryElm.style.fontSize = "12px";
-				memoryElm.style.color = "#fff";
-				this.canvasWrapElm.appendChild( memoryElm );
+				this.canvasWrap.appendChild( memoryElm );
 
 				const timerElm = document.createElement( 'div' );
 				timerElm.classList.add( "dev" );
-				timerElm.style.pointerEvents = "none";
 				timerElm.style.position = "absolute";
 				timerElm.style.maxWidth = "300px";
 				timerElm.style.width = "50%";
@@ -83,21 +78,28 @@ class App {
 				timerElm.style.right = "0";
 				timerElm.style.overflowY = 'auto';
 				timerElm.style.fontSize = "12px";
-				this.canvasWrapElm.appendChild( timerElm );
+				this.canvasWrap.appendChild( timerElm );
 
-				this.canvasWrapElm.style.fontFamily = "'Share Tech Mono', monospace";
+				this.canvasWrap.style.fontFamily = "'Share Tech Mono', monospace";
 
 				gpuState.init( memoryElm, timerElm );
 
 			}
 
+			// this.animate();
+
 		}
 
-		this.play();
 
 	}
 
 	private animate() {
+
+		if ( gpuState ) {
+
+			gpuState.update();
+
+		}
 
 		this.scene.update();
 
@@ -105,34 +107,26 @@ class App {
 
 	}
 
-	private play() {
-
-		this.resize();
-		this.animate();
-
-		this.canvasWrapElm.style.opacity = "1";
-
-	}
-
 	private resize() {
 
-		const aspect = 16 / 9;
-		const scale = 1.0;
+		const canvasAspect = window.innerWidth / window.innerHeight;
 
-		this.canvas.width = 1920 * scale;
-		this.canvas.height = this.canvas.width / aspect;
+		const scale = canvasAspect < 1.0 ? Math.min( 1.5, window.devicePixelRatio ) : 1.0;
 
-		if ( window.innerWidth / window.innerHeight < aspect ) {
+		const blkRatioX = canvasAspect < 1.0 ? 0.75 : 1.0;
+		const blkRatioY = canvasAspect < 1.0 ? 0.7 : 0.5;
 
-			this.canvas.style.width = window.innerWidth + 'px';
-			this.canvas.style.height = window.innerWidth / aspect + 'px';
+		const width = window.innerWidth * blkRatioX;
+		const height = window.innerHeight * blkRatioY;
 
-		} else {
+		this.canvasWrap.style.width = width + 'px';
+		this.canvasWrap.style.height = height + 'px';
 
-			this.canvas.style.height = window.innerHeight + 'px';
-			this.canvas.style.width = window.innerHeight * aspect + 'px';
+		this.canvas.width = width * scale;
+		this.canvas.height = height * scale;
 
-		}
+		this.canvas.style.width = "100%";
+		this.canvas.style.height = "100%";
 
 		this.scene.resize( new GLP.Vector( this.canvas.width, this.canvas.height ) );
 
