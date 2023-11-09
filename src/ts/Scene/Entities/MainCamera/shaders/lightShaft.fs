@@ -19,7 +19,7 @@ in vec2 vUv;
 layout (location = 0) out vec4 outColor;
 
 const float MARCH_LENGTH = 25.0;
-const float MARCH = 32.0;
+const float MARCH = 18.0;
 
 #include <noise>
 
@@ -67,7 +67,7 @@ void main( void ) {
 
 				dLight = directionalLight[ LOOP_INDEX ];
 
-				lightShaftSum += dLight.color * getShadowSmooth( rayPos, directionalLightCamera[ LOOP_INDEX ], directionalLightShadowMap[ LOOP_INDEX ] ) * rayStepLength * 0.02;
+				lightShaftSum += dLight.color * (getShadow( rayPos, directionalLightCamera[ LOOP_INDEX ], directionalLightShadowMap[ LOOP_INDEX ] )) * rayStepLength * 0.3;
 
 			#pragma loop_end
 		
@@ -110,6 +110,6 @@ void main( void ) {
 
 	}
 
-	outColor = vec4( mix( texture( uLightShaftBackBuffer, vUv ).xyz, lightShaftSum, 0.9 ), 1.0 );
+	outColor = vec4( mix( texture( uLightShaftBackBuffer, vUv ).xyz, lightShaftSum, 0.9), 1.0 );
 
 }

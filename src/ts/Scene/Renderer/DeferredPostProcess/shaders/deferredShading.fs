@@ -78,6 +78,4 @@ void main( void ) {
 
 	glFragOut0 = glFragOut1 = vec4( outColor.xyz, 1.0 );
 
-	gl_FragDepth = 0.5;
-
 }
