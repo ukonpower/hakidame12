@@ -1,5 +1,6 @@
 import * as MXP from 'maxpower';
 import { Skybox } from '../Entities/Skybox';
+import { FluidParticles } from '../Entities/FluidParticles';
 
 export const router = ( node: MXP.BLidgeNode ) => {
 
@@ -8,6 +9,10 @@ export const router = ( node: MXP.BLidgeNode ) => {
 	if ( node.class == "Skybox" ) {
 
 		return new Skybox();
+
+	} else if ( node.class == "FluidParticles" ) {
+
+		return new FluidParticles();
 
 	}
 

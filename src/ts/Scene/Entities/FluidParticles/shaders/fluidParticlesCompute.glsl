@@ -14,36 +14,16 @@ in vec2 vUv;
 #include <noise4D>
 #include <rotate>
 
-uniform vec4 uMidi;
-uniform vec4 uMidi2;
-uniform float uPause;
-
-uniform sampler2D uAudioWaveTex;
-uniform sampler2D uAudioFreqTex;
-
-
 void main( void ) {
-
-	float audio = texture( uAudioFreqTex, vec2(0.1, 0.0 ) ).x;
-	audio = smoothstep( 0.2, 0.8, audio );
 
 	float id = vUv.x + vUv.y * uGPUResolution.x;
 
 	vec4 position = texture( gpuSampler0, vUv );
 	vec4 velocity = texture( gpuSampler1, vUv );
 
-	if( uPause == 1.0 ) {
-		
-		outColor0 = position;
-		outColor1 = velocity;
-		
-		return;
-		
-	}
-
 	float t = uTime;
 
-	float around = uMidi2.z;
+	float around = 0.0;
 	float aroundInv = 1.0 - around;
 
 	// velocity
@@ -58,7 +38,7 @@ void main( void ) {
 		snoise4D( vec4( noisePosition + 2345.6, pt) )
 	) * 0.003;
 
-	velocity.xyz += noise * (0.5 + audio * 0.8) * (uMidi.x * 2.0);
+	velocity.xyz += noise * 1.0;
 
 	float rotDir = atan2( position.z, position.x );
 	velocity.x += sin( rotDir ) * 0.0003 * around;

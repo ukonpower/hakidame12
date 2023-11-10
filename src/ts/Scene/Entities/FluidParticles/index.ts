@@ -19,16 +19,7 @@ export class FluidParticles extends MXP.Entity {
 
 		const count = new GLP.Vector( 128, 128 );
 
-		this.commonUniforms = GLP.UniformsUtils.merge( {
-			uPause: {
-				value: 0,
-				type: '1f'
-			},
-			uVisibility: {
-				value: 0,
-				type: "1f"
-			}
-		} );
+		this.commonUniforms = GLP.UniformsUtils.merge( globalUniforms.time );
 
 		/*-------------------------------
 			GPU
@@ -39,7 +30,7 @@ export class FluidParticles extends MXP.Entity {
 			size: count,
 			layerCnt: 2,
 			frag: MXP.hotGet( 'fluidParticlesCompute', fluidParticlesCompute ),
-			uniforms: GLP.UniformsUtils.merge( globalUniforms.time, this.commonUniforms ),
+			uniforms: GLP.UniformsUtils.merge( this.commonUniforms ),
 		} );
 
 		this.gpu.initTexture( ( l, x, y ) => {
@@ -81,7 +72,7 @@ export class FluidParticles extends MXP.Entity {
 		const mat = this.addComponent( "material", new MXP.Material( {
 			name: "fluid",
 			type: [ "deferred", "shadowMap" ],
-			uniforms: GLP.UniformsUtils.merge( globalUniforms.time, globalUniforms.resolution, this.commonUniforms, this.gpu.outputUniforms, {
+			uniforms: GLP.UniformsUtils.merge( this.commonUniforms, this.gpu.outputUniforms, {
 			} ),
 			vert: MXP.hotGet( 'fluidParticlesVert', fluidParticlesVert ),
 			frag: MXP.hotGet( 'fluidParticlesFrag', fluidParticlesFrag ),
@@ -119,12 +110,6 @@ export class FluidParticles extends MXP.Entity {
 			} );
 
 		}
-
-	}
-
-	public set trailVisibility( value: number ) {
-
-		this.commonUniforms.uVisibility.value = value;
 
 	}
 

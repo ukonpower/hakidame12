@@ -67,7 +67,7 @@ void main( void ) {
 
 				dLight = directionalLight[ LOOP_INDEX ];
 
-				lightShaftSum += dLight.color * (getShadow( rayPos, directionalLightCamera[ LOOP_INDEX ], directionalLightShadowMap[ LOOP_INDEX ] )) * rayStepLength * 0.3;
+				lightShaftSum += dLight.color * ( getShadow( rayPos, directionalLightCamera[ LOOP_INDEX ], directionalLightShadowMap[ LOOP_INDEX ] )) * rayStepLength * 0.0025;
 
 			#pragma loop_end
 		

@@ -1,7 +1,7 @@
 import * as GLP from 'glpower';
 import * as MXP from 'maxpower';
 
-import { gl, globalUniforms, power } from "~/ts/Globals";
+import { canvas, canvas, gl, globalUniforms, power } from "~/ts/Globals";
 
 import fxaaFrag from './shaders/fxaa.fs';
 import bloomBlurFrag from './shaders/bloomBlur.fs';
@@ -20,6 +20,7 @@ import compositeFrag from './shaders/composite.fs';
 import { RenderCamera, RenderCameraParam } from '~/ts/libs/maxpower/Component/Camera/RenderCamera';
 import { ShakeViewer } from '../../Components/ShakeViewer';
 import { LookAt } from '../../Components/LookAt';
+import { OrbitControls } from '../../Components/OrbitControls';
 
 export class MainCamera extends MXP.Entity {
 
@@ -108,6 +109,7 @@ export class MainCamera extends MXP.Entity {
 		this.cameraComponent = this.addComponent( "camera", new RenderCamera( param ) );
 		const lookAt = this.addComponent( 'lookAt', new LookAt() );
 		this.addComponent( 'shakeViewer', new ShakeViewer( 0.5, 1.0 ) );
+		this.addComponent( "controls", new OrbitControls( window.document.body ) );
 
 		// resolution
 

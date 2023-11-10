@@ -1,16 +1,17 @@
 import * as GLP from 'glpower';
+import * as MXP from 'maxpower';
+
 import { Camera } from 'maxpower';
-import { Component, ComponentUpdateEvent } from 'maxpower/Component';
 import { Pointer, PointerEventArgs } from '~/ts/libs/Pointer';
 
-export class OrbitControls extends Component {
+export class OrbitControls extends MXP.Component {
 
 	private pointer: Pointer;
 	private offsetPos: GLP.Vector;
 	private offsetPosTmp: GLP.Vector;
 	private matrixTmp: GLP.Matrix;
 
-	constructor( targetElm: HTMLCanvasElement ) {
+	constructor( targetElm: HTMLElement ) {
 
 		super();
 
@@ -51,7 +52,7 @@ export class OrbitControls extends Component {
 
 	}
 
-	protected afterUpdateImpl( event: ComponentUpdateEvent ): void {
+	protected afterUpdateImpl( event: MXP.ComponentUpdateEvent ): void {
 
 		const entity = event.entity;
 
