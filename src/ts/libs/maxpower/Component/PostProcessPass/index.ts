@@ -25,12 +25,16 @@ export class PostProcessPass extends Material {
 	public resolutionRatio: number;
 	public passThrough: boolean;
 
+	public resolution: GLP.Vector;
+
 	constructor( param: PostProcessPassParam ) {
 
 		super( { ...param, vert: param.vert || quadVert } );
 
+		this.resolution = new GLP.Vector();
+
 		this.uniforms.uPPResolution = {
-			value: new GLP.Vector(),
+			value: this.resolution,
 			type: '2fv'
 		};
 
@@ -56,12 +60,24 @@ export class PostProcessPass extends Material {
 
 	public resize( event: ComponentResizeEvent ): void {
 
+		this.resolution.copy( event.resolution ).multiply( this.resolutionRatio );
+		this.uniforms.uPPPixelSize.value.set( 1.0 / this.resolution.x, 1.0 / this.resolution.y );
+
 		if ( this.renderTarget ) {
 
-			this.renderTarget.setSize( event.resolution.clone().multiply( this.resolutionRatio ) );
+			this.renderTarget.setSize( this.resolution );
 
-			this.uniforms.uPPResolution.value.copy( this.renderTarget.size );
-			this.uniforms.uPPPixelSize.value.set( 1.0 / this.renderTarget.size.x, 1.0 / this.renderTarget.size.y );
+		}
+
+	}
+
+	public setRendertarget( renderTarget:GLP.GLPowerFrameBuffer | null ) {
+
+		this.renderTarget = renderTarget;
+
+		if ( this.renderTarget && ( this.renderTarget.size.x != this.resolution.x || this.renderTarget.size.y != this.resolution.y ) ) {
+
+			this.renderTarget.setSize( this.resolution );
 
 		}
 

@@ -6,7 +6,7 @@ precision highp float;
 in vec2 vUv;
 
 uniform sampler2D uBackBlurTex;
-uniform vec2 uResolution;
+uniform vec2 uPPResolution;
 uniform bool uIsVertical;
 uniform float blurRange;
 
@@ -24,8 +24,8 @@ void main(void) {
   
   for (int i = 1; i < GAUSS_WEIGHTS; i++) {
     vec2 offset = (uIsVertical ? vec2(0, i) : vec2(i, 0)) * 1.0;
-    sum += uWeights[i] * texture(uBackBlurTex, vUv + offset / uResolution).rgb;
-    sum += uWeights[i] * texture(uBackBlurTex, vUv - offset / uResolution).rgb;
+    sum += uWeights[i] * texture(uBackBlurTex, vUv + offset / uPPResolution).rgb;
+    sum += uWeights[i] * texture(uBackBlurTex, vUv - offset / uPPResolution).rgb;
   }
   
   outColor = vec4(sum, 1.0);

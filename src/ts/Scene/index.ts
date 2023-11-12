@@ -80,7 +80,7 @@ export class Scene extends GLP.EventEmitter {
 
 		this.carpenter = new Carpenter( this.root, this.camera );
 
-		this.root.add( new HUD() );
+		// this.root.add( new HUD() );
 
 		// renderer
 

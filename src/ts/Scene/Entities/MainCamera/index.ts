@@ -438,11 +438,14 @@ export class MainCamera extends MXP.Entity {
 
 		}
 
+		let bloomScale = 2.0;
+
 		this.bloomBright = new MXP.PostProcessPass( {
 			name: 'bloom/bright/',
 			frag: bloomBrightFrag,
 			uniforms: GLP.UniformsUtils.merge( globalUniforms.time, {} ),
 			passThrough: true,
+			resolutionRatio: 1.0 / bloomScale,
 		} );
 
 		this.bloomBlur = [];
@@ -476,15 +479,12 @@ export class MainCamera extends MXP.Entity {
 						type: '1fv',
 						value: this.guassWeight( this.bloomRenderCount )
 					},
-					uResolution: {
-						type: '2fv',
-						value: resolution,
-					}
 				},
 				defines: {
 					GAUSS_WEIGHTS: this.bloomRenderCount.toString()
 				},
 				passThrough: true,
+				resolutionRatio: 1.0 / bloomScale
 			} ) );
 
 			this.bloomBlur.push( new MXP.PostProcessPass( {
@@ -513,9 +513,12 @@ export class MainCamera extends MXP.Entity {
 					GAUSS_WEIGHTS: this.bloomRenderCount.toString()
 				},
 				passThrough: true,
+				resolutionRatio: 1.0 / bloomScale
 			} ) );
 
 			bloomInput = rtHorizonal.textures;
+
+			bloomScale *= 2.0;
 
 		}
 
@@ -566,19 +569,19 @@ export class MainCamera extends MXP.Entity {
 				this.ssr,
 				this.ssao,
 				this.ssComposite,
-				this.dofCoc,
-				this.dofBokeh,
-				this.dofComposite,
-				this.motionBlurTile,
-				this.motionBlurNeighbor,
-				this.motionBlur,
+				// this.dofCoc,
+				// this.dofBokeh,
+				// this.dofComposite,
+				// this.motionBlurTile,
+				// this.motionBlurNeighbor,
+				// this.motionBlur,
 			]
 		} ) );
 
 		this.addComponent( "postProcess", new MXP.PostProcess( {
 			input: param.renderTarget.uiBuffer.textures,
 			passes: [
-				this.fxaa,
+				// this.fxaa,
 				this.bloomBright,
 				...this.bloomBlur,
 				this.composite,
@@ -670,7 +673,7 @@ export class MainCamera extends MXP.Entity {
 		this.rtLightShaft1 = this.rtLightShaft2;
 		this.rtLightShaft2 = tmp;
 
-		this.lightShaft.renderTarget = this.rtLightShaft1;
+		this.lightShaft.setRendertarget( this.rtLightShaft1 );
 		this.ssComposite.uniforms.uLightShaftTexture.value = this.rtLightShaft1.textures[ 0 ];
 		this.lightShaft.uniforms.uLightShaftBackBuffer.value = this.rtLightShaft2.textures[ 0 ];
 
@@ -680,7 +683,7 @@ export class MainCamera extends MXP.Entity {
 		this.rtSSR1 = this.rtSSR2;
 		this.rtSSR2 = tmp;
 
-		this.ssr.renderTarget = this.rtSSR1;
+		this.ssr.setRendertarget( this.rtSSR1 );
 		this.ssComposite.uniforms.uSSRTexture.value = this.rtSSR1.textures[ 0 ];
 		this.ssr.uniforms.uSSRBackBuffer.value = this.rtSSR2.textures[ 0 ];
 
@@ -690,7 +693,7 @@ export class MainCamera extends MXP.Entity {
 		this.rtSSAO1 = this.rtSSAO2;
 		this.rtSSAO2 = tmp;
 
-		this.ssao.renderTarget = this.rtSSAO1;
+		this.ssao.setRendertarget( this.rtSSAO1 );
 		this.ssComposite.uniforms.uSSAOTexture.value = this.rtSSAO1.textures[ 0 ];
 		this.ssao.uniforms.uSSAOBackBuffer.value = this.rtSSAO2.textures[ 0 ];
 
@@ -706,27 +709,6 @@ export class MainCamera extends MXP.Entity {
 		resolutionHalf.y = Math.max( Math.floor( resolutionHalf.y ), 1.0 );
 
 		this.updateCameraParams( this.resolution );
-
-		let scale = 2;
-
-		for ( let i = 0; i < this.bloomRenderCount; i ++ ) {
-
-			this.resolutionBloom[ i ].copy( e.resolution ).multiply( 1.0 / scale );
-			this.rtBloomHorizonal[ i ].setSize( this.resolutionBloom[ i ] );
-			this.rtBloomVertical[ i ].setSize( this.resolutionBloom[ i ] );
-
-			scale *= 2.0;
-
-		}
-
-		this.rtLightShaft1.setSize( e.resolution );
-		this.rtLightShaft2.setSize( e.resolution );
-
-		this.rtSSR1.setSize( resolutionHalf );
-		this.rtSSR2.setSize( resolutionHalf );
-
-		this.rtSSAO1.setSize( e.resolution );
-		this.rtSSAO2.setSize( e.resolution );
 
 	}
 
