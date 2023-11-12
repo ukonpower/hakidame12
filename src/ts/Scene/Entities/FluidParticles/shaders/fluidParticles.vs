@@ -20,8 +20,6 @@ void main( void ) {
 
 	outPos *= rnd.x * rnd.x * 5.0;
 
-	// outPos *= 0.2 + 0.8 * (sin( length( gpuPos.xyz) * 3.0 - uTime * 5.0 ) * 0.5 + 0.5);
-	
 	outPos *= smoothstep( 1.0, 0.1, gpuPos.w);
 	outPos *= smoothstep( 0.1, 0.15, gpuPos.w);
 	outPos += gpuPos.xyz;

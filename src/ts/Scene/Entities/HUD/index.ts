@@ -12,24 +12,11 @@ export class HUD extends MXP.Entity {
 
 		super();
 
-		const img = document.createElement( "img" );
-		img.src = "data:image/svg+xml," + encodeURIComponent( `
-		<svg width="512" height="256" viewBox="0 0 512 256" fill="none" xmlns="http://www.w3.org/2000/svg">
-		<path d="M128.985 95.4286H80.9254V157.143H183.91V44H26V212H252.567V44H486V212H324.657V95.4286H431.075V157.143H376.149" stroke="white" stroke-width="8"/>
-		</svg>
-		` );
-
 		const texture = new GLP.GLPowerTexture( gl );
 		texture.setting( {
 			wrapS: gl.REPEAT,
 			wrapT: gl.REPEAT,
 		} );
-
-		img.onload = () => {
-
-			texture.attach( img );
-
-		};
 
 		const border = new MXP.Entity();
 		this.add( border );
@@ -38,7 +25,7 @@ export class HUD extends MXP.Entity {
 
 		borderGeo.setAttribute( 'num', new Float32Array( ( ()=>{
 
-			const num = 2;
+			const num = 4;
 
 			const r: number[] = [];
 

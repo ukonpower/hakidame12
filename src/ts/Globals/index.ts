@@ -3,7 +3,7 @@ import * as MXP from 'maxpower';
 
 
 export const canvas = document.createElement( "canvas" );
-export const gl = canvas.getContext( 'webgl2' )!;
+export const gl = canvas.getContext( 'webgl2', { antialias: false } )!;
 export const power = new GLP.Power( gl );
 export const blidge = new MXP.BLidge();
 

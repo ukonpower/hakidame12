@@ -21,7 +21,7 @@ void main( void ) {
 	e *= 1.0;
 	
 	float emit = step( 0.95, vRnd.x );
-	outEmission += emit * e * vec3( 0.8, 5.0, 0.8 );
+	outEmission += vec3( 1.0 );
 	
 	#include <frag_out>
 

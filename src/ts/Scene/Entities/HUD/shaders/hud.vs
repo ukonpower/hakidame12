@@ -18,7 +18,6 @@ void main( void ) {
 	
 	gl_Position = vec4( pos.xy, 0.0, 1.0 );
 
-
 	vUv = uv;
 	vUv.x *= 19.0;
 	vUv.x += uTime * 0.5 * sign(num - 0.5);

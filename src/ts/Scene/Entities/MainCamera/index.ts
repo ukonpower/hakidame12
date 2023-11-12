@@ -1,7 +1,7 @@
 import * as GLP from 'glpower';
 import * as MXP from 'maxpower';
 
-import { canvas, canvas, gl, globalUniforms, power } from "~/ts/Globals";
+import { gl, globalUniforms, power } from "~/ts/Globals";
 
 import fxaaFrag from './shaders/fxaa.fs';
 import bloomBlurFrag from './shaders/bloomBlur.fs';
@@ -21,6 +21,7 @@ import { RenderCamera, RenderCameraParam } from '~/ts/libs/maxpower/Component/Ca
 import { ShakeViewer } from '../../Components/ShakeViewer';
 import { LookAt } from '../../Components/LookAt';
 import { OrbitControls } from '../../Components/OrbitControls';
+import { RotateViewer } from '../../Components/RotateViewer';
 
 export class MainCamera extends MXP.Entity {
 
@@ -110,6 +111,7 @@ export class MainCamera extends MXP.Entity {
 		const lookAt = this.addComponent( 'lookAt', new LookAt() );
 		this.addComponent( 'shakeViewer', new ShakeViewer( 0.5, 1.0 ) );
 		this.addComponent( "controls", new OrbitControls( window.document.body ) );
+		this.addComponent( "rotate", new RotateViewer( 5 ) );
 
 		// resolution
 
@@ -267,6 +269,10 @@ export class MainCamera extends MXP.Entity {
 					value: param.renderTarget.forwardBuffer.textures[ 0 ],
 					type: '1i'
 				},
+				uGbufferEmission: {
+					value: param.renderTarget.forwardBuffer.textures[ 3 ],
+					type: '1i'
+				},
 				uLightShaftTexture: {
 					value: this.rtLightShaft2.textures[ 0 ],
 					type: '1i'
@@ -403,7 +409,6 @@ export class MainCamera extends MXP.Entity {
 			defines: {
 				"TILE": motionBlurTile,
 			},
-			renderTarget: param.renderTarget.uiBuffer
 		} );
 
 		// fxaa
@@ -436,12 +441,7 @@ export class MainCamera extends MXP.Entity {
 		this.bloomBright = new MXP.PostProcessPass( {
 			name: 'bloom/bright/',
 			frag: bloomBrightFrag,
-			uniforms: GLP.UniformsUtils.merge( globalUniforms.time, {
-				threshold: {
-					type: '1f',
-					value: 0.5,
-				},
-			} ),
+			uniforms: GLP.UniformsUtils.merge( globalUniforms.time, {} ),
 			passThrough: true,
 		} );
 
@@ -541,7 +541,6 @@ export class MainCamera extends MXP.Entity {
 			defines: {
 				BLOOM_COUNT: this.bloomRenderCount.toString()
 			},
-			renderTarget: null
 		} );
 
 		if ( import.meta.hot ) {
@@ -556,12 +555,11 @@ export class MainCamera extends MXP.Entity {
 
 				this.composite.requestUpdate();
 
-
 			} );
 
 		}
 
-		this.addComponent( "prePostprocess", new MXP.PostProcess( {
+		this.addComponent( "scenePostProcess", new MXP.PostProcess( {
 			input: param.renderTarget.deferredBuffer.textures,
 			passes: [
 				this.lightShaft,
@@ -577,7 +575,7 @@ export class MainCamera extends MXP.Entity {
 			]
 		} ) );
 
-		this.addComponent( "postprocess", new MXP.PostProcess( {
+		this.addComponent( "postProcess", new MXP.PostProcess( {
 			input: param.renderTarget.uiBuffer.textures,
 			passes: [
 				this.fxaa,

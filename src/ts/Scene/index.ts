@@ -6,6 +6,7 @@ import { Renderer } from './Renderer';
 import { createTextures } from './Textures';
 import { gl, power, globalUniforms } from '../Globals';
 import { Carpenter } from './Carpenter';
+import { HUD } from './Entities/HUD';
 
 type SceneUpdateParam = {
 	forceDraw: boolean
@@ -79,9 +80,11 @@ export class Scene extends GLP.EventEmitter {
 
 		this.carpenter = new Carpenter( this.root, this.camera );
 
+		this.root.add( new HUD() );
+
 		// renderer
 
-		this.renderer = new Renderer();
+		this.renderer = new Renderer( gl );
 		this.root.add( this.renderer );
 
 	}

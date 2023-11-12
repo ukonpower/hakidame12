@@ -17,7 +17,7 @@ export class FluidParticles extends MXP.Entity {
 
 		super();
 
-		const count = new GLP.Vector( 128, 128 );
+		const count = new GLP.Vector( 64, 64 );
 
 		this.commonUniforms = GLP.UniformsUtils.merge( globalUniforms.time );
 
@@ -61,7 +61,7 @@ export class FluidParticles extends MXP.Entity {
 
 		}
 
-		const geo = this.addComponent( "geometry", new MXP.SphereGeometry( 0.05 ) );
+		const geo = this.addComponent( "geometry", new MXP.CubeGeometry( 0.1, 0.1, 0.1 ) );
 		geo.setAttribute( "computeUV", new Float32Array( computeUVArray ), 2, { instanceDivisor: 1 } );
 		geo.setAttribute( "rnd", new Float32Array( rndArray ), 3, { instanceDivisor: 1 } );
 

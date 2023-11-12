@@ -18,13 +18,16 @@ uniform float[GAUSS_WEIGHTS] uWeights;
 //]
 
 void main(void) {
+  
   vec2 coord = vec2(gl_FragCoord.xy);
   vec3 sum = uWeights[0] * texture(uBackBlurTex, vUv).rgb;
   
   for (int i = 1; i < GAUSS_WEIGHTS; i++) {
-    vec2 offset = (uIsVertical ? vec2(0, i) : vec2(i, 0)) * 1.7;
+    vec2 offset = (uIsVertical ? vec2(0, i) : vec2(i, 0)) * 1.0;
     sum += uWeights[i] * texture(uBackBlurTex, vUv + offset / uResolution).rgb;
     sum += uWeights[i] * texture(uBackBlurTex, vUv - offset / uResolution).rgb;
   }
+  
   outColor = vec4(sum, 1.0);
+  
 }

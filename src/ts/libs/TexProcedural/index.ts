@@ -17,7 +17,7 @@ export class TexProcedural extends GLP.GLPowerTexture {
 			wrapT: gl.REPEAT,
 		} );
 
-		const renderer = new Renderer();
+		const renderer = new Renderer( gl );
 
 		renderer.resize( {
 			resolution

@@ -27,7 +27,15 @@ export class PostProcess extends Component {
 
 		this.input = param.input || [];
 
-		this.output = this.passes[ this.passes.length - 1 ].renderTarget;
+		if ( this.passes.length > 0 ) {
+
+			this.output = this.passes[ this.passes.length - 1 ].renderTarget;
+
+		} else {
+
+			this.output = null;
+
+		}
 
 	}
 

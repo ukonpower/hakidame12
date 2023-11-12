@@ -1,8 +1,8 @@
 import * as GLP from 'glpower';
-import { Component, ComponentUpdateEvent } from 'maxpower/Component';
-import { Entity } from 'maxpower/Entity';
+import * as MXP from 'maxpower';
 
-export class RotateViewer extends Component {
+
+export class RotateViewer extends MXP.Component {
 
 	private speed: number;
 
@@ -28,7 +28,7 @@ export class RotateViewer extends Component {
 
 	}
 
-	protected setEntityImpl( entity: Entity | null, prevEntity: Entity | null ): void {
+	protected setEntityImpl( entity: MXP.Entity | null, prevEntity: MXP.Entity | null ): void {
 
 		if ( entity ) {
 
@@ -43,7 +43,7 @@ export class RotateViewer extends Component {
 	}
 
 
-	protected updateImpl( event: ComponentUpdateEvent ): void {
+	protected updateImpl( event: MXP.ComponentUpdateEvent ): void {
 
 		const entity = event.entity;
 

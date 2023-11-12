@@ -45,7 +45,9 @@ void main( void ) {
 	velocity.z += -cos( rotDir ) * 0.0003 * around;
 
 	// gravity
+	
 	vec3 gravity = vec3( 0.00001 );
+	
 	vec3 gPos = vec3( 0.0 );
 	gPos = position.xyz + vec3( 0.0, 0.0, 0.0 );
 	gravity += gPos.xyz * smoothstep( 0.0, 4.0, length( gPos.xyz ) ) * -vec3(0.0001) * aroundInv;

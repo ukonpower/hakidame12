@@ -10,15 +10,13 @@ uniform vec4 uState;
 void main( void ) {
 
 
-	vec4 c = texture( uTex, vUv );
+	vec3 col = vec3(1.0);
 
-	if( c.w < 0.5 ) {
-
+	if( sin( vUv.x * 20.0 + vUv.y * 3.0 ) > 0.1 ) {
 		discard;
-		
 	}
 
-	outColor0 = vec4( vec3( 0.5), 1.0 );
+	outColor0 = vec4( col, 0.5 );
 	
 } 
 

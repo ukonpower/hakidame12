@@ -32,6 +32,8 @@ export class Camera extends Component {
 
 	public needsUpdate: boolean;
 
+	public displayOut: boolean;
+
 	constructor( param: CameraParam ) {
 
 		super();
@@ -46,8 +48,6 @@ export class Camera extends Component {
 		this.viewMatrixPrev = new GLP.Matrix();
 		this.projectionMatrixPrev = new GLP.Matrix();
 
-		this.needsUpdate = false;
-
 		this.fov = param.fov || 50;
 		this.near = param.near || 0.01;
 		this.far = param.far || 1000;
@@ -57,6 +57,8 @@ export class Camera extends Component {
 		this.orthHeight = param.orthHeight || 1;
 
 		this.needsUpdate = true;
+
+		this.displayOut = true;
 
 	}
 

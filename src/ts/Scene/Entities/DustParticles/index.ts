@@ -1,7 +1,7 @@
 import * as GLP from 'glpower';
 import * as MXP from 'maxpower';
 
-import { gl, globalUniforms, lpd8 } from '~/ts/Globals';
+import { gl, globalUniforms } from '~/ts/Globals';
 
 import dustParticlesVert from './shaders/dustParticles.vs';
 import dustParticlesFrag from './shaders/dustParticles.fs';
@@ -51,25 +51,6 @@ export class DustParticles extends MXP.Entity {
 			frag: MXP.hotGet( 'dustParticlesFrag', dustParticlesFrag ),
 			drawType: gl.POINTS
 		} ) );
-
-		lpd8.on( "pad2/0", ( value: number ) => {
-
-			this.action.x = value;
-
-		} );
-
-		lpd8.on( "pad2/1", ( value: number ) => {
-
-			this.action.y = value;
-
-		} );
-
-
-		lpd8.on( "pad2/2", ( value: number ) => {
-
-			this.action.z = ( this.action.z + 1 ) % 3;
-
-		} );
 
 		if ( import.meta.hot ) {
 
