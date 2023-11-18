@@ -13,7 +13,6 @@ export interface PostProcessPassParam extends MaterialParam{
 }
 
 import quadVert from './shaders/quad.vs';
-import { ComponentResizeEvent } from '..';
 
 export class PostProcessPass extends Material {
 
@@ -58,9 +57,9 @@ export class PostProcessPass extends Material {
 	public onAfterRender() {
 	}
 
-	public resize( event: ComponentResizeEvent ): void {
+	public resize( resolution: GLP.Vector ): void {
 
-		this.resolution.copy( event.resolution ).multiply( this.resolutionRatio );
+		this.resolution.copy( resolution ).multiply( this.resolutionRatio );
 		this.uniforms.uPPPixelSize.value.set( 1.0 / this.resolution.x, 1.0 / this.resolution.y );
 
 		if ( this.renderTarget ) {

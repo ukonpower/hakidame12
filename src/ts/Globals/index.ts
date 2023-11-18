@@ -27,10 +27,6 @@ export const globalUniforms: {[key: string]: GLP.Uniforms} = {
 		}
 	},
 	resolution: {
-		uResolution: {
-			value: new GLP.Vector(),
-			type: '2fv'
-		},
 		uAspectRatio: {
 			value: 1.0,
 			type: '1f'

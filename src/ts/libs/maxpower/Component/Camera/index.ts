@@ -34,7 +34,7 @@ export class Camera extends Component {
 
 	public displayOut: boolean;
 
-	constructor( param: CameraParam ) {
+	constructor( param?: CameraParam ) {
 
 		super();
 

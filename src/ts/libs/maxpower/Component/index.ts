@@ -1,12 +1,8 @@
 import * as GLP from 'glpower';
 
-import { Entity, EntityResizeEvent, EntityUpdateEvent } from '../Entity';
+import { Entity, EntityUpdateEvent } from '../Entity';
 
 export type ComponentUpdateEvent = EntityUpdateEvent & {
-	entity: Entity,
-}
-
-export type ComponentResizeEvent = EntityResizeEvent & {
 	entity: Entity,
 }
 
@@ -19,7 +15,8 @@ export type BuiltInComponents =
 	'geometry' |
 	'light' |
 	'blidger' |
-	'postprocess' |
+	'scenePostProcess' |
+	'postProcess' |
 	'gpuCompute' |
 ( string & {} );
 
@@ -75,16 +72,6 @@ export class Component extends GLP.EventEmitter {
 
 	}
 
-	public resize( event: ComponentResizeEvent ) {
-
-		if ( this.entity ) {
-
-			this.resizeImpl( event );
-
-		}
-
-	}
-
 	protected setEntityImpl( entity: Entity | null, prevEntity: Entity | null ) {}
 
 	protected preUpdateImpl( event: ComponentUpdateEvent ) {}
@@ -92,8 +79,6 @@ export class Component extends GLP.EventEmitter {
 	protected updateImpl( event: ComponentUpdateEvent ) {}
 
 	protected afterUpdateImpl( event: ComponentUpdateEvent ) {}
-
-	protected resizeImpl( event: ComponentResizeEvent ) {}
 
 	public dispose() {
 

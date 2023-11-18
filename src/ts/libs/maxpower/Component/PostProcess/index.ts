@@ -1,6 +1,6 @@
 import * as GLP from 'glpower';
 
-import { Component, ComponentResizeEvent } from '..';
+import { Component } from '..';
 import { PostProcessPass } from '../PostProcessPass';
 
 export interface PostProcessParam {
@@ -39,11 +39,11 @@ export class PostProcess extends Component {
 
 	}
 
-	protected resizeImpl( event: ComponentResizeEvent ): void {
+	public resize( resolution: GLP.Vector ): void {
 
 		for ( let i = 0; i < this.passes.length; i ++ ) {
 
-			this.passes[ i ].resize( event );
+			this.passes[ i ].resize( resolution );
 
 		}
 

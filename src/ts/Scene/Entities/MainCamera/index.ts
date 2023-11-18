@@ -17,7 +17,7 @@ import motionBlurNeighborFrag from './shaders/motionBlurNeighbor.fs';
 import motionBlurFrag from './shaders/motionBlur.fs';
 import ssCompositeFrag from './shaders/ssComposite.fs';
 import compositeFrag from './shaders/composite.fs';
-import { RenderCamera, RenderCameraParam } from '~/ts/libs/maxpower/Component/Camera/RenderCamera';
+import { RenderCamera, RenderCameraParam, RenderCameraTarget } from '~/ts/libs/maxpower/Component/Camera/RenderCamera';
 import { ShakeViewer } from '../../Components/ShakeViewer';
 import { LookAt } from '../../Components/LookAt';
 import { OrbitControls } from '../../Components/OrbitControls';
@@ -25,11 +25,15 @@ import { RotateViewer } from '../../Components/RotateViewer';
 
 export class MainCamera extends MXP.Entity {
 
+	private baseFov: number;
+
 	private commonUniforms: GLP.Uniforms;
+
+	// camera component
 
 	private cameraComponent: RenderCamera;
 
-	private baseFov: number;
+	private renderTarget: RenderCameraTarget;
 
 	// fxaa
 
@@ -107,7 +111,9 @@ export class MainCamera extends MXP.Entity {
 
 		// components
 
-		this.cameraComponent = this.addComponent( "camera", new RenderCamera( param ) );
+		this.cameraComponent = this.addComponent( "camera", new RenderCamera( gl ) );
+		this.renderTarget = this.cameraComponent.renderTarget;
+
 		const lookAt = this.addComponent( 'lookAt', new LookAt() );
 		this.addComponent( 'shakeViewer', new ShakeViewer( 0.5, 1.0 ) );
 		this.addComponent( "controls", new OrbitControls( window.document.body ) );
@@ -152,7 +158,7 @@ export class MainCamera extends MXP.Entity {
 					type: '1i'
 				},
 				uDepthTexture: {
-					value: param.renderTarget.gBuffer.depthTexture,
+					value: this.renderTarget.gBuffer.depthTexture,
 					type: '1i'
 				},
 			} ),
@@ -184,15 +190,15 @@ export class MainCamera extends MXP.Entity {
 					type: '2fv',
 				},
 				uGbufferPos: {
-					value: param.renderTarget.gBuffer.textures[ 0 ],
+					value: this.renderTarget.gBuffer.textures[ 0 ],
 					type: '1i'
 				},
 				uGbufferNormal: {
-					value: param.renderTarget.gBuffer.textures[ 1 ],
+					value: this.renderTarget.gBuffer.textures[ 1 ],
 					type: '1i'
 				},
 				uSceneTex: {
-					value: param.renderTarget.forwardBuffer.textures[ 0 ],
+					value: this.renderTarget.forwardBuffer.textures[ 0 ],
 					type: '1i'
 				},
 				uSSRBackBuffer: {
@@ -200,7 +206,7 @@ export class MainCamera extends MXP.Entity {
 					type: '1i'
 				},
 				uDepthTexture: {
-					value: param.renderTarget.gBuffer.depthTexture,
+					value: this.renderTarget.gBuffer.depthTexture,
 					type: '1i'
 				},
 			} ),
@@ -232,11 +238,11 @@ export class MainCamera extends MXP.Entity {
 					type: '2fv',
 				},
 				uGbufferPos: {
-					value: param.renderTarget.gBuffer.textures[ 0 ],
+					value: this.renderTarget.gBuffer.textures[ 0 ],
 					type: '1i'
 				},
 				uGbufferNormal: {
-					value: param.renderTarget.gBuffer.textures[ 1 ],
+					value: this.renderTarget.gBuffer.textures[ 1 ],
 					type: '1i'
 				},
 				uSSAOBackBuffer: {
@@ -244,7 +250,7 @@ export class MainCamera extends MXP.Entity {
 					type: '1i'
 				},
 				uDepthTexture: {
-					value: param.renderTarget.gBuffer.depthTexture,
+					value: this.renderTarget.gBuffer.depthTexture,
 					type: '1i'
 				},
 			} ),
@@ -258,19 +264,19 @@ export class MainCamera extends MXP.Entity {
 			frag: ssCompositeFrag,
 			uniforms: GLP.UniformsUtils.merge( this.commonUniforms, {
 				uGbufferPos: {
-					value: param.renderTarget.gBuffer.textures[ 0 ],
+					value: this.renderTarget.gBuffer.textures[ 0 ],
 					type: '1i'
 				},
 				uGbufferNormal: {
-					value: param.renderTarget.gBuffer.textures[ 1 ],
+					value: this.renderTarget.gBuffer.textures[ 1 ],
 					type: '1i'
 				},
 				uShadingBuffer: {
-					value: param.renderTarget.forwardBuffer.textures[ 0 ],
+					value: this.renderTarget.forwardBuffer.textures[ 0 ],
 					type: '1i'
 				},
 				uGbufferEmission: {
-					value: param.renderTarget.forwardBuffer.textures[ 3 ],
+					value: this.renderTarget.forwardBuffer.textures[ 3 ],
 					type: '1i'
 				},
 				uLightShaftTexture: {
@@ -298,7 +304,7 @@ export class MainCamera extends MXP.Entity {
 			frag: dofCoc,
 			uniforms: GLP.UniformsUtils.merge( globalUniforms.time, {
 				uDepthTex: {
-					value: param.renderTarget.gBuffer.depthTexture,
+					value: this.renderTarget.gBuffer.depthTexture,
 					type: "1i"
 				},
 				uParams: {
@@ -356,7 +362,7 @@ export class MainCamera extends MXP.Entity {
 			frag: motionBlurTileFrag,
 			uniforms: GLP.UniformsUtils.merge( {
 				uVelTex: {
-					value: param.renderTarget.gBuffer.textures[ 4 ],
+					value: this.renderTarget.gBuffer.textures[ 4 ],
 					type: '1i'
 				},
 			} ),
@@ -398,11 +404,11 @@ export class MainCamera extends MXP.Entity {
 					type: '1i'
 				},
 				uVelTex: {
-					value: param.renderTarget.gBuffer.textures[ 4 ],
+					value: this.renderTarget.gBuffer.textures[ 4 ],
 					type: '1i'
 				},
 				uDepthTexture: {
-					value: param.renderTarget.gBuffer.depthTexture,
+					value: this.renderTarget.gBuffer.depthTexture,
 					type: '1i'
 				},
 			} ),
@@ -563,23 +569,23 @@ export class MainCamera extends MXP.Entity {
 		}
 
 		this.addComponent( "scenePostProcess", new MXP.PostProcess( {
-			input: param.renderTarget.deferredBuffer.textures,
+			input: this.renderTarget.deferredBuffer.textures,
 			passes: [
 				this.lightShaft,
 				this.ssr,
 				this.ssao,
 				this.ssComposite,
-				// this.dofCoc,
-				// this.dofBokeh,
-				// this.dofComposite,
-				// this.motionBlurTile,
-				// this.motionBlurNeighbor,
-				// this.motionBlur,
+				this.dofCoc,
+				this.dofBokeh,
+				this.dofComposite,
+				this.motionBlurTile,
+				this.motionBlurNeighbor,
+				this.motionBlur,
 			]
 		} ) );
 
 		this.addComponent( "postProcess", new MXP.PostProcess( {
-			input: param.renderTarget.uiBuffer.textures,
+			input: this.renderTarget.uiBuffer.textures,
 			passes: [
 				this.fxaa,
 				this.bloomBright,
@@ -699,10 +705,29 @@ export class MainCamera extends MXP.Entity {
 
 	}
 
-	protected resizeImpl( e: MXP.ComponentResizeEvent ): void {
+	public resize( resolution: GLP.Vector ): void {
 
-		this.resolution.copy( e.resolution );
-		this.resolutionInv.set( 1.0 / e.resolution.x, 1.0 / e.resolution.y, 0.0, 0.0 );
+		this.cameraComponent.resize( resolution );
+
+		const scenePostProcess = this.getComponent<MXP.PostProcess>( "scenePostProcess" );
+
+		if ( scenePostProcess ) {
+
+			scenePostProcess.resize( resolution );
+
+		}
+
+		const postprocess = this.getComponent<MXP.PostProcess>( "postProcess" );
+
+		if ( postprocess ) {
+
+			postprocess.resize( resolution );
+
+		}
+
+
+		this.resolution.copy( resolution );
+		this.resolutionInv.set( 1.0 / resolution.x, 1.0 / resolution.y, 0.0, 0.0 );
 
 		const resolutionHalf = this.resolution.clone().divide( 2 );
 		resolutionHalf.x = Math.max( Math.floor( resolutionHalf.x ), 1.0 );

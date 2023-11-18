@@ -21,8 +21,8 @@ void main( void ) {
 	e *= 1.0;
 	
 	float emit = step( 0.95, vRnd.x );
-	outColor.xyz *= 0.0;
-	outEmission += vec3( 1.0, 0.0, 0.0 );
+	// outColor.xyz *= 0.0;
+	// outEmission += vec3( 1.0, 0.0, 0.0 );
 	
 	#include <frag_out>
 

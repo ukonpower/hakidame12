@@ -1,7 +1,7 @@
 import * as GLP from 'glpower';
 
 import { RenderStack } from "~/ts/Scene/Renderer";
-import { Component, ComponentUpdateEvent, ComponentResizeEvent, BuiltInComponents } from "../Component";
+import { Component, ComponentUpdateEvent, BuiltInComponents } from "../Component";
 import { Camera } from "../Component/Camera";
 import { GPUCompute } from "../Component/GPUCompute";
 import { Geometry } from "../Component/Geometry";
@@ -211,36 +211,6 @@ export class Entity extends GLP.EventEmitter {
 	}
 
 	protected afterUpdateImpl( event:EntityUpdateEvent ) {
-	}
-
-	/*-------------------------------
-		Resize
-	-------------------------------*/
-
-	public resize( event: EntityResizeEvent ) {
-
-		this.components.forEach( c => {
-
-			const cEvent = event as ComponentResizeEvent;
-			cEvent.entity = this;
-
-			c.resize( cEvent );
-
-		} );
-
-		this.resizeImpl( event );
-
-		this.emit( "resize", [ event ] );
-
-		for ( let i = 0; i < this.children.length; i ++ ) {
-
-			this.children[ i ].resize( event );
-
-		}
-
-	}
-
-	protected resizeImpl( event:EntityResizeEvent ) {
 	}
 
 	/*-------------------------------

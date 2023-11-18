@@ -58,7 +58,7 @@ export class GLPowerFrameBuffer {
 
 	}
 
-	public setTexture( textures: GLPowerTexture[] ) {
+	public setTexture( textures: GLPowerTexture[], skip?: boolean ) {
 
 		this.textures = textures;
 		this.textureAttachmentList.length = 0;
@@ -67,7 +67,7 @@ export class GLPowerFrameBuffer {
 
 		this.textures.forEach( ( t, i ) => {
 
-			t.attach( { width: this.size.x, height: this.size.y } );
+			! skip && t.attach( { width: this.size.x, height: this.size.y } );
 
 			const attachment = this.gl.COLOR_ATTACHMENT0 + i;
 			this.gl.framebufferTexture2D( this.gl.FRAMEBUFFER, attachment, this.gl.TEXTURE_2D, t.getTexture(), 0 );

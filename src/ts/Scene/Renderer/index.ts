@@ -6,6 +6,7 @@ import { ProgramManager } from "./ProgramManager";
 import { shaderParse } from "./ShaderParser";
 import { DeferredPostProcess } from './DeferredPostProcess';
 import { RenderCamera } from '~/ts/libs/maxpower/Component/Camera/RenderCamera';
+import { BufferView } from './BufferView';
 
 export type RenderStack = {
 	light: MXP.Entity[];
@@ -81,9 +82,10 @@ export class Renderer extends MXP.Entity {
 	private queryList: WebGLQuery[];
 	private queryListQueued: {name: string, query: WebGLQuery}[];
 
-	// buffers
+	// bufferView
 
-	private bufferViewRenderTarget: GLP.GLPowerFrameBuffer;
+	private bufferView?: BufferView;
+	private viewBuffers: boolean;
 
 	// tmp
 
@@ -142,9 +144,23 @@ export class Renderer extends MXP.Entity {
 
 		// buffers
 
-		this.bufferViewRenderTarget = new GLP.GLPowerFrameBuffer( gl ).setTexture( [
-			power.createTexture().setting( { type: gl.FLOAT, internalFormat: gl.RGBA32F, format: gl.RGBA, magFilter: gl.NEAREST, minFilter: gl.NEAREST } ),
-		] );
+		if ( process.env.NODE_ENV == "development" ) {
+
+			this.bufferView = new BufferView( gl );
+
+			window.addEventListener( "keydown", ( e ) => {
+
+				if ( e.key == "d" ) {
+
+					this.viewBuffers = ! this.viewBuffers;
+
+				}
+
+			} );
+
+		}
+
+		this.viewBuffers = false;
 
 		// tmp
 
@@ -203,6 +219,16 @@ export class Renderer extends MXP.Entity {
 					}
 
 				}
+
+			}
+
+		}
+
+		if ( process.env.NODE_ENV == "development" ) {
+
+			if ( this.bufferView ) {
+
+				this.bufferView.clear();
 
 			}
 
@@ -360,7 +386,7 @@ export class Renderer extends MXP.Entity {
 
 				if ( cameraComponent.displayOut ) {
 
-					if ( postProcess.output ) {
+					if ( postProcess.output && ! this.viewBuffers ) {
 
 						this.gl.bindFramebuffer( this.gl.READ_FRAMEBUFFER, postProcess.output.getFrameBuffer() );
 						this.gl.bindFramebuffer( this.gl.DRAW_FRAMEBUFFER, null );
@@ -441,6 +467,16 @@ export class Renderer extends MXP.Entity {
 			drawParam.modelMatrixWorldPrev = entity.matrixWorldPrev;
 
 			this.draw( entity.uuid.toString(), renderType, geometry, material, drawParam );
+
+		}
+
+		if ( process.env.NODE_ENV == "development" ) {
+
+			if ( this.viewBuffers && this.bufferView && renderTarget ) {
+
+				this.bufferView.draw( renderTarget );
+
+			}
 
 		}
 
@@ -541,6 +577,16 @@ export class Renderer extends MXP.Entity {
 			if ( ! pass.passThrough && pass.renderTarget ) {
 
 				backbuffers = pass.renderTarget.textures;
+
+			}
+
+			if ( process.env.NODE_ENV == "development" ) {
+
+				if ( this.viewBuffers && this.bufferView && pass.renderTarget ) {
+
+					this.bufferView.draw( pass.renderTarget );
+
+				}
 
 			}
 
@@ -857,11 +903,19 @@ export class Renderer extends MXP.Entity {
 
 	}
 
-	public resize( e: MXP.EntityResizeEvent ) {
+	public resize( resolution: GLP.Vector ) {
 
-		this.canvasSize.copy( e.resolution );
+		this.canvasSize.copy( resolution );
 
-		this.deferredPostProcess.resize( { resolution: e.resolution, entity: this } );
+		if ( process.env.NODE_ENV == "development" ) {
+
+			if ( this.bufferView ) {
+
+				this.bufferView.resize( resolution );
+
+			}
+
+		}
 
 	}
 
