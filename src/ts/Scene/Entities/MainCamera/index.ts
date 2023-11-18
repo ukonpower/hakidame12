@@ -17,7 +17,7 @@ import motionBlurNeighborFrag from './shaders/motionBlurNeighbor.fs';
 import motionBlurFrag from './shaders/motionBlur.fs';
 import ssCompositeFrag from './shaders/ssComposite.fs';
 import compositeFrag from './shaders/composite.fs';
-import { RenderCamera, RenderCameraParam, RenderCameraTarget } from '~/ts/libs/maxpower/Component/Camera/RenderCamera';
+import { RenderCamera, RenderCameraTarget } from '~/ts/libs/maxpower/Component/Camera/RenderCamera';
 import { ShakeViewer } from '../../Components/ShakeViewer';
 import { LookAt } from '../../Components/LookAt';
 import { OrbitControls } from '../../Components/OrbitControls';
@@ -103,7 +103,7 @@ export class MainCamera extends MXP.Entity {
 	private tmpVector1: GLP.Vector;
 	private tmpVector2: GLP.Vector;
 
-	constructor( param: RenderCameraParam ) {
+	constructor( ) {
 
 		super();
 

@@ -2,12 +2,12 @@ import * as GLP from 'glpower';
 
 export class ProgramManager {
 
-	private power: GLP.Power;
+	private gl: WebGL2RenderingContext;
 	private pool: Map<string, GLP.GLPowerProgram>;
 
-	constructor( power: GLP.Power ) {
+	constructor( gl: WebGL2RenderingContext ) {
 
-		this.power = power;
+		this.gl = gl;
 		this.pool = new Map();
 
 	}
@@ -24,7 +24,7 @@ export class ProgramManager {
 
 		}
 
-		const program = new GLP.GLPowerProgram( this.power.gl );
+		const program = new GLP.GLPowerProgram( this.gl );
 
 		program.setShader( vertexShader, fragmentShader );
 

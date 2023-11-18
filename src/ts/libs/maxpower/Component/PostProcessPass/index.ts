@@ -13,6 +13,7 @@ export interface PostProcessPassParam extends MaterialParam{
 }
 
 import quadVert from './shaders/quad.vs';
+import passFrag from './shaders/pass.fs';
 
 export class PostProcessPass extends Material {
 
@@ -28,7 +29,7 @@ export class PostProcessPass extends Material {
 
 	constructor( param: PostProcessPassParam ) {
 
-		super( { ...param, vert: param.vert || quadVert } );
+		super( { ...param, frag: param.frag || passFrag, vert: param.vert || quadVert } );
 
 		this.resolution = new GLP.Vector();
 

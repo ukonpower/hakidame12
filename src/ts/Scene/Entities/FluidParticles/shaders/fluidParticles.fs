@@ -13,16 +13,12 @@ void main( void ) {
 	outColor = vec4( 1.0 );
 	outColor.xyz *= 1.0;
 
-	outRoughness = .2;
-	outMetalic = 0.0;
-
 	float dnv = dot( normalize( vViewNormal ), normalize( -vMVPosition ) );
 	float e = pow( smoothstep(0.0, 0.9, dnv ), 3.0 );
 	e *= 1.0;
 	
 	float emit = step( 0.95, vRnd.x );
-	// outColor.xyz *= 0.0;
-	// outEmission += vec3( 1.0, 0.0, 0.0 );
+	outEmission += vec3( 1.0, 0.0, 0.0 );
 	
 	#include <frag_out>
 

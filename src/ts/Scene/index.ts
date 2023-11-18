@@ -4,8 +4,10 @@ import * as MXP from 'maxpower';
 import { MainCamera } from './Entities/MainCamera';
 import { Renderer } from './Renderer';
 import { createTextures } from './Textures';
-import { gl, globalUniforms } from '../Globals';
+import { gl, globalUniforms, power } from '../Globals';
 import { Carpenter } from './Carpenter';
+import { RenderCamera } from '../libs/maxpower/Component/Camera/RenderCamera';
+import { BufferViewer } from './BufferViewer';
 
 type SceneUpdateParam = {
 	forceDraw: boolean
@@ -20,6 +22,14 @@ export class Scene extends GLP.EventEmitter {
 	private root: MXP.Entity;
 	private camera: MainCamera;
 	private renderer: Renderer;
+
+	// bufferView
+
+	private cameraComponent: RenderCamera;
+
+	private bufferViewer?: BufferViewer;
+
+	// carpenter
 
 	private carpenter: Carpenter;
 
@@ -43,9 +53,11 @@ export class Scene extends GLP.EventEmitter {
 
 		// camera
 
-		this.camera = new MainCamera( { gl } );
+		this.camera = new MainCamera();
 		this.camera.position.set( 0, 0, 4 );
 		this.root.add( this.camera );
+
+		this.cameraComponent = this.camera.getComponent<RenderCamera>( 'camera' )!;
 
 		// carpenter
 
@@ -55,8 +67,39 @@ export class Scene extends GLP.EventEmitter {
 
 		// renderer
 
-		this.renderer = new Renderer( gl );
+		this.renderer = new Renderer( );
 		this.root.add( this.renderer );
+
+		// buffers
+
+		if ( process.env.NODE_ENV == "development" ) {
+
+			const bufferViewer = new BufferViewer( gl );
+
+			window.addEventListener( "keydown", ( e ) => {
+
+				if ( e.key == "d" ) {
+
+					this.cameraComponent.displayOut = ! this.cameraComponent.displayOut;
+
+				}
+
+			} );
+
+			this.renderer.on( 'drawPass', ( rt?: GLP.GLPowerFrameBuffer ) => {
+
+				if ( this.bufferViewer && rt && ! this.cameraComponent.displayOut ) {
+
+					this.bufferViewer.push( rt );
+
+				}
+
+			} );
+
+			this.bufferViewer = bufferViewer;
+
+
+		}
 
 	}
 
@@ -82,6 +125,16 @@ export class Scene extends GLP.EventEmitter {
 
 		this.renderer.render( renderStack );
 
+		if ( process.env.NODE_ENV == "development" ) {
+
+			if ( this.bufferViewer && ! this.cameraComponent.displayOut ) {
+
+				this.bufferViewer.draw();
+
+			}
+
+		}
+
 		return this.deltaTime;
 
 	}
@@ -91,6 +144,16 @@ export class Scene extends GLP.EventEmitter {
 		this.renderer.resize( resolution );
 
 		this.camera.resize( resolution );
+
+		if ( process.env.NODE_ENV == "development" ) {
+
+			if ( this.bufferViewer ) {
+
+				this.bufferViewer.resize( resolution );
+
+			}
+
+		}
 
 	}
 

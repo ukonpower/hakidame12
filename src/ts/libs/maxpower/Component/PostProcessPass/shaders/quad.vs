@@ -6,7 +6,6 @@ layout ( location = 1 ) in vec2 uv;
 
 out vec2 vUv;
 
-
 void main( void ) {
 
 	vec3 pos = position;
