@@ -581,7 +581,7 @@ export class MainCamera extends MXP.Entity {
 		this.addComponent( "postProcess", new MXP.PostProcess( {
 			input: param.renderTarget.uiBuffer.textures,
 			passes: [
-				// this.fxaa,
+				this.fxaa,
 				this.bloomBright,
 				...this.bloomBlur,
 				this.composite,

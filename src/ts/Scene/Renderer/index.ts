@@ -81,6 +81,10 @@ export class Renderer extends MXP.Entity {
 	private queryList: WebGLQuery[];
 	private queryListQueued: {name: string, query: WebGLQuery}[];
 
+	// buffers
+
+	private bufferViewRenderTarget: GLP.GLPowerFrameBuffer;
+
 	// tmp
 
 	private tmpNormalMatrix: GLP.Matrix;
@@ -136,6 +140,12 @@ export class Renderer extends MXP.Entity {
 		this.queryList = [];
 		this.queryListQueued = [];
 
+		// buffers
+
+		this.bufferViewRenderTarget = new GLP.GLPowerFrameBuffer( gl ).setTexture( [
+			power.createTexture().setting( { type: gl.FLOAT, internalFormat: gl.RGBA32F, format: gl.RGBA, magFilter: gl.NEAREST, minFilter: gl.NEAREST } ),
+		] );
+
 		// tmp
 
 		this.tmpLightDirection = new GLP.Vector();
@@ -146,11 +156,13 @@ export class Renderer extends MXP.Entity {
 
 		this.gl.blendFunc( this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA );
 
+
+
 	}
 
 	public render( stack: RenderStack ) {
 
-		if ( process.env.NODE_ENV == 'development' ) {
+		if ( process.env.NODE_ENV == 'development' && power.extDisJointTimerQuery ) {
 
 			const disjoint = this.gl.getParameter( power.extDisJointTimerQuery.GPU_DISJOINT_EXT );
 
@@ -762,7 +774,7 @@ export class Renderer extends MXP.Entity {
 
 				let query: WebGLQuery | null = null;
 
-				if ( process.env.NODE_ENV == 'development' ) {
+				if ( process.env.NODE_ENV == 'development' && power.extDisJointTimerQuery ) {
 
 					query = this.queryList.pop() || null;
 
