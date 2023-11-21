@@ -137,14 +137,12 @@ export class FrameDebugger extends GLP.EventEmitter {
 				this.gl.bindFramebuffer( this.gl.DRAW_FRAMEBUFFER, this.outFrameBuffer.getFrameBuffer() );
 
 				let { x, y } = this.calcTilePos( this.count );
-				let w = this.tilePixelSize.x, h = this.tilePixelSize.y;
+				const w = this.tilePixelSize.x, h = this.tilePixelSize.y;
 
 				if ( this.focus !== null ) {
 
 					x = 0;
 					y = 0;
-					w = this.resolution.x;
-					h = this.resolution.y;
 
 				}
 
@@ -159,7 +157,7 @@ export class FrameDebugger extends GLP.EventEmitter {
 				this.frameList.push( {
 					frameBuffer: frameBuffer,
 					texture: tex,
-					label: label ? label + ( i > 0 ? "_" + i : '' ) : ''
+					label: label ? label + ( frameBuffer.textures.length > 1 ? "_" + i : '' ) : ''
 				} );
 
 			}
@@ -190,7 +188,7 @@ export class FrameDebugger extends GLP.EventEmitter {
 
 			const frame = this.frameList[ i ];
 
-			this.cctx.fillText( frame.label, x + 5, y + 15 );
+			this.cctx.fillText( frame.label, x + 5, y + this.tilePixelSize.y - 5 );
 
 		}
 
@@ -200,11 +198,17 @@ export class FrameDebugger extends GLP.EventEmitter {
 
 		this.renderer.renderPostProcess( this.outPostProcess );
 
+		this.clear();
+
+	}
+
+	private clear() {
+
 		// calc status
 
 		this.total = this.count;
 
-		const sqrt = Math.sqrt( this.total );
+		const sqrt = Math.sqrt( this.focus !== null ? 1 : this.total );
 		this.tile.set( Math.round( sqrt ), Math.ceil( sqrt ) );
 		this.tileInv.set( 1.0, 1.0 ).divide( this.tile );
 		this.tilePixelSize.copy( this.tileInv ).multiply( this.resolution );
@@ -250,15 +254,16 @@ export class FrameDebugger extends GLP.EventEmitter {
 
 			this.focus = null;
 
-			return;
+		} else {
+
+			const x = Math.floor( e.clientX / this.tilePixelSize.x );
+			const y = Math.floor( e.clientY / this.tilePixelSize.y );
+
+			this.focus = x + y * this.tile.x;
 
 		}
 
-		const x = Math.floor( e.clientX / this.tilePixelSize.x );
-		const y = Math.floor( e.clientY / this.tilePixelSize.y );
-
-		this.focus = x + y * this.tile.x;
-
+		this.clear();
 
 	}
 

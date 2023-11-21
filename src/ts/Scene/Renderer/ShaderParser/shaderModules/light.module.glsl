@@ -67,12 +67,11 @@ LightCamera lightCamera;
 
 		radiance = RE( geo, mat, light );
 		outColor.xyz += shadow * radiance;
-		outColor.xyz += mat.subsurface * light.color;
 
 	#pragma loop_end
 
 #endif
 
-outColor.xyz += mat.emission;
+outColor.xyz += mat.emission * mat.emissionIntensity;
 
 //]

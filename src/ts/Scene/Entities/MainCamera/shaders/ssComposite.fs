@@ -4,10 +4,11 @@
 #include <re>
 #include <noise>
 
+uniform sampler2D backbuffer0;
+
 uniform sampler2D uGbufferPos;
 uniform sampler2D uGbufferNormal;
 uniform sampler2D uGbufferEmission;
-uniform sampler2D uShadingBuffer;
 
 uniform sampler2D uLightShaftTexture;
 uniform sampler2D uSSRTexture;
@@ -30,9 +31,9 @@ void main( void ) {
 	vec3 dir = normalize( cameraPosition - gCol0.xyz );
 	float f = fresnel( dot( dir, gCol1.xyz ) );
 
-	outColor += vec4( texture( uShadingBuffer, vUv ).xyz, 1.0 );
+	outColor += vec4( texture( backbuffer0, vUv ).xyz, 1.0 );
 	outColor += texture( uSSRTexture, vUv ) * 0.3 * f;
-	outColor *= max( 0.0, 1.0 - texture( uSSAOTexture, vUv ).x * 4.0 * ( 1.0 - length(gCol2.xyz) ) );
+	// outColor *= max( 0.0, 1.0 - texture( uSSAOTexture, vUv ).x * 4.0 * ( 1.0 - length(gCol2.xyz) ) );
 	outColor += texture( uLightShaftTexture, vUv );
 
 }

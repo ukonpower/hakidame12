@@ -5,7 +5,7 @@ import { Vector } from "glpower";
 
 export type RenderCameraTarget = {
 	gBuffer: GLPowerFrameBuffer,
-	deferredBuffer: GLPowerFrameBuffer,
+	shadingBuffer: GLPowerFrameBuffer,
 	forwardBuffer: GLPowerFrameBuffer,
 	uiBuffer: GLPowerFrameBuffer,
 }
@@ -31,24 +31,27 @@ export class RenderCamera extends Camera {
 			power.createTexture().setting( { type: gl.FLOAT, internalFormat: gl.RGBA32F, format: gl.RGBA } ),
 		] );
 
-		const deferredBuffer = new GLPowerFrameBuffer( gl, { disableDepthBuffer: true } );
-		deferredBuffer.setTexture( [ power.createTexture().setting( { type: gl.FLOAT, internalFormat: gl.RGBA32F, format: gl.RGBA } ), power.createTexture() ] );
+		const shadingBuffer = new GLPowerFrameBuffer( gl, { disableDepthBuffer: true } );
+		shadingBuffer.setTexture( [
+			power.createTexture().setting( { type: gl.FLOAT, internalFormat: gl.RGBA16F, format: gl.RGBA } ),
+			power.createTexture().setting( { type: gl.FLOAT, internalFormat: gl.RGBA16F, format: gl.RGBA } ),
+		] );
 
 		const forwardBuffer = new GLPowerFrameBuffer( gl, { disableDepthBuffer: true } );
 		forwardBuffer.setDepthTexture( gBuffer.depthTexture );
-		forwardBuffer.setTexture( [ deferredBuffer.textures[ 0 ] ] );
+		forwardBuffer.setTexture( [ shadingBuffer.textures[ 0 ] ] );
 
 		const uiBuffer = new GLPowerFrameBuffer( gl, { disableDepthBuffer: true } );
 		uiBuffer.setTexture( [ power.createTexture() ] );
 
-		this.renderTarget = { gBuffer, deferredBuffer, forwardBuffer, uiBuffer };
+		this.renderTarget = { gBuffer, shadingBuffer: shadingBuffer, forwardBuffer, uiBuffer };
 
 	}
 
 	public resize( resolution: Vector ) {
 
 		this.renderTarget.gBuffer.setSize( resolution );
-		this.renderTarget.deferredBuffer.setSize( resolution );
+		this.renderTarget.shadingBuffer.setSize( resolution );
 		this.renderTarget.forwardBuffer.setSize( resolution );
 		this.renderTarget.uiBuffer.setSize( resolution );
 

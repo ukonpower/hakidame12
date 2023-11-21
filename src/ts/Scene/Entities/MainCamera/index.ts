@@ -2,7 +2,13 @@ import * as GLP from 'glpower';
 import * as MXP from 'maxpower';
 
 import { gl, globalUniforms, power } from "~/ts/Globals";
+import { RenderCamera, RenderCameraTarget } from '~/ts/libs/maxpower/Component/Camera/RenderCamera';
+import { ShakeViewer } from '../../Components/ShakeViewer';
+import { LookAt } from '../../Components/LookAt';
+import { OrbitControls } from '../../Components/OrbitControls';
+import { RotateViewer } from '../../Components/RotateViewer';
 
+import colorCollectionFrag from './shaders/colorCollection.fs';
 import fxaaFrag from './shaders/fxaa.fs';
 import bloomBlurFrag from './shaders/bloomBlur.fs';
 import bloomBrightFrag from './shaders/bloomBright.fs';
@@ -17,11 +23,6 @@ import motionBlurNeighborFrag from './shaders/motionBlurNeighbor.fs';
 import motionBlurFrag from './shaders/motionBlur.fs';
 import ssCompositeFrag from './shaders/ssComposite.fs';
 import compositeFrag from './shaders/composite.fs';
-import { RenderCamera, RenderCameraTarget } from '~/ts/libs/maxpower/Component/Camera/RenderCamera';
-import { ShakeViewer } from '../../Components/ShakeViewer';
-import { LookAt } from '../../Components/LookAt';
-import { OrbitControls } from '../../Components/OrbitControls';
-import { RotateViewer } from '../../Components/RotateViewer';
 
 export class MainCamera extends MXP.Entity {
 
@@ -34,6 +35,10 @@ export class MainCamera extends MXP.Entity {
 	private cameraComponent: RenderCamera;
 
 	private renderTarget: RenderCameraTarget;
+
+	// colorCollection
+
+	private colorCollection: MXP.PostProcessPass;
 
 	// fxaa
 
@@ -136,6 +141,13 @@ export class MainCamera extends MXP.Entity {
 				type: "2f",
 				value: this.resolutionInv
 			}
+		} );
+
+		// color collection
+
+		this.colorCollection = new MXP.PostProcessPass( {
+			name: 'collection',
+			frag: colorCollectionFrag,
 		} );
 
 		// light shaft
@@ -269,10 +281,6 @@ export class MainCamera extends MXP.Entity {
 				},
 				uGbufferNormal: {
 					value: this.renderTarget.gBuffer.textures[ 1 ],
-					type: '1i'
-				},
-				uShadingBuffer: {
-					value: this.renderTarget.forwardBuffer.textures[ 0 ],
 					type: '1i'
 				},
 				uGbufferEmission: {
@@ -449,7 +457,12 @@ export class MainCamera extends MXP.Entity {
 		this.bloomBright = new MXP.PostProcessPass( {
 			name: 'bloom/bright/',
 			frag: bloomBrightFrag,
-			uniforms: GLP.UniformsUtils.merge( globalUniforms.time, {} ),
+			uniforms: {
+				uShadingTex: {
+					value: this.renderTarget.shadingBuffer.textures[ 0 ],
+					type: "1i"
+				}
+			},
 			passThrough: true,
 			resolutionRatio: 1.0 / bloomScale,
 		} );
@@ -468,6 +481,8 @@ export class MainCamera extends MXP.Entity {
 			const resolution = new GLP.Vector();
 			this.resolutionBloom.push( resolution );
 
+			const guassSamples = 8.0;
+
 			this.bloomBlur.push( new MXP.PostProcessPass( {
 				name: 'bloom/blur/' + i + '/v',
 				renderTarget: rtVertical,
@@ -483,11 +498,11 @@ export class MainCamera extends MXP.Entity {
 					},
 					uWeights: {
 						type: '1fv',
-						value: this.guassWeight( this.bloomRenderCount )
+						value: this.guassWeight( guassSamples )
 					},
 				},
 				defines: {
-					GAUSS_WEIGHTS: this.bloomRenderCount.toString()
+					GAUSS_WEIGHTS: guassSamples.toString()
 				},
 				passThrough: true,
 				resolutionRatio: 1.0 / bloomScale
@@ -508,7 +523,7 @@ export class MainCamera extends MXP.Entity {
 					},
 					uWeights: {
 						type: '1fv',
-						value: this.guassWeight( this.bloomRenderCount )
+						value: this.guassWeight( guassSamples )
 					},
 					uResolution: {
 						type: '2fv',
@@ -516,7 +531,7 @@ export class MainCamera extends MXP.Entity {
 					}
 				},
 				defines: {
-					GAUSS_WEIGHTS: this.bloomRenderCount.toString()
+					GAUSS_WEIGHTS: guassSamples.toString()
 				},
 				passThrough: true,
 				resolutionRatio: 1.0 / bloomScale
@@ -569,27 +584,28 @@ export class MainCamera extends MXP.Entity {
 		}
 
 		this.addComponent( "scenePostProcess", new MXP.PostProcess( {
-			input: this.renderTarget.deferredBuffer.textures,
+			input: this.renderTarget.shadingBuffer.textures,
 			passes: [
+				this.colorCollection,
 				this.lightShaft,
 				this.ssr,
 				this.ssao,
 				this.ssComposite,
-				this.dofCoc,
-				this.dofBokeh,
-				this.dofComposite,
-				this.motionBlurTile,
-				this.motionBlurNeighbor,
-				this.motionBlur,
+				// this.dofCoc,
+				// this.dofBokeh,
+				// this.dofComposite,
+				// this.motionBlurTile,
+				// this.motionBlurNeighbor,
+				// this.motionBlur,
 			]
 		} ) );
 
 		this.addComponent( "postProcess", new MXP.PostProcess( {
 			input: this.renderTarget.uiBuffer.textures,
 			passes: [
-				this.fxaa,
 				this.bloomBright,
 				...this.bloomBlur,
+				this.fxaa,
 				this.composite,
 			]
 		} ) );

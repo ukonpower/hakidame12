@@ -49,7 +49,7 @@ export class DeferredPostProcess extends MXP.PostProcess {
 
 		} );
 
-		this.shading.renderTarget = renderTarget.deferredBuffer;
+		this.shading.renderTarget = renderTarget.shadingBuffer;
 
 	}
 

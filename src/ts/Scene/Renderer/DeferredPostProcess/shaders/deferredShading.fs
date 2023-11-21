@@ -6,7 +6,7 @@
 // uniforms
 
 uniform sampler2D sampler0; // position, depth
-uniform sampler2D sampler1; // normal, outss
+uniform sampler2D sampler1; // normal, emissionIntensity
 uniform sampler2D sampler2; // albedo, roughness
 uniform sampler2D sampler3; // emission, metalic
 uniform sampler2D sampler4; // velocity, env
@@ -50,9 +50,9 @@ void main( void ) {
 		tex2.w,
 		tex3.w,
 		tex3.xyz,
+		tex1.w,
 		mix( tex2.xyz, vec3( 0.0, 0.0, 0.0 ), tex3.w ),
-		mix( vec3( 1.0, 1.0, 1.0 ), tex2.xyz, tex3.w ),
-		unpackColor( tex1.w )
+		mix( vec3( 1.0, 1.0, 1.0 ), tex2.xyz, tex3.w )
 	);
 	float envIntensity = tex4.w;
 	vec3 outColor = vec3( 0.0 );

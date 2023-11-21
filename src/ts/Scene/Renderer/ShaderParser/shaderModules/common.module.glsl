@@ -18,9 +18,9 @@ struct Material {
 	float roughness;
 	float metalic;
 	vec3 emission;
+	float emissionIntensity;
 	vec3 diffuseColor;
 	vec3 specularColor;
-	vec3 subsurface;
 };
 
 struct DirectionalLight {

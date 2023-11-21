@@ -14,11 +14,10 @@ void main( void ) {
 	outColor.xyz *= 1.0;
 
 	float dnv = dot( normalize( vViewNormal ), normalize( -vMVPosition ) );
-	float e = pow( smoothstep(0.0, 0.9, dnv ), 3.0 );
-	e *= 1.0;
-	
-	float emit = step( 0.95, vRnd.x );
-	outEmission += vec3( 1.0, 0.0, 0.0 );
+
+	float emit = step( 0.99, length( vRnd ) );
+	outEmission += vec3( vRnd ) * emit * 0.8;
+	outEmissionIntensity = 10.0;
 	
 	#include <frag_out>
 
