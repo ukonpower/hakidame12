@@ -4,10 +4,11 @@ import * as MXP from 'maxpower';
 import { MainCamera } from './Entities/MainCamera';
 import { Renderer } from './Renderer';
 import { createTextures } from './Textures';
-import { gl, globalUniforms, power } from '../Globals';
+import { gl, globalUniforms } from '../Globals';
 import { Carpenter } from './Carpenter';
 import { RenderCamera } from '../libs/maxpower/Component/Camera/RenderCamera';
-import { BufferViewer } from './BufferViewer';
+import { FrameDebugger } from './FrameDebugger';
+import { HUD } from './Entities/HUD';
 
 type SceneUpdateParam = {
 	forceDraw: boolean
@@ -26,8 +27,7 @@ export class Scene extends GLP.EventEmitter {
 	// bufferView
 
 	private cameraComponent: RenderCamera;
-
-	private bufferViewer?: BufferViewer;
+	private frameDebugger?: FrameDebugger;
 
 	// carpenter
 
@@ -74,29 +74,36 @@ export class Scene extends GLP.EventEmitter {
 
 		if ( process.env.NODE_ENV == "development" ) {
 
-			const bufferViewer = new BufferViewer( gl );
+			const frameDebugger = new FrameDebugger( gl );
 
 			window.addEventListener( "keydown", ( e ) => {
 
 				if ( e.key == "d" ) {
 
-					this.cameraComponent.displayOut = ! this.cameraComponent.displayOut;
+					frameDebugger.enable = ! frameDebugger.enable;
+					this.cameraComponent.displayOut = ! frameDebugger.enable;
+
+					queueMicrotask( () => {
+
+						frameDebugger.reflesh();
+
+					} );
 
 				}
 
 			} );
 
-			this.renderer.on( 'drawPass', ( rt?: GLP.GLPowerFrameBuffer ) => {
+			this.renderer.on( 'drawPass', ( rt?: GLP.GLPowerFrameBuffer, label?: string ) => {
 
-				if ( this.bufferViewer && rt && ! this.cameraComponent.displayOut ) {
+				if ( this.frameDebugger && this.frameDebugger.enable && rt ) {
 
-					this.bufferViewer.push( rt );
+					this.frameDebugger.push( rt, label );
 
 				}
 
 			} );
 
-			this.bufferViewer = bufferViewer;
+			this.frameDebugger = frameDebugger;
 
 
 		}
@@ -127,9 +134,9 @@ export class Scene extends GLP.EventEmitter {
 
 		if ( process.env.NODE_ENV == "development" ) {
 
-			if ( this.bufferViewer && ! this.cameraComponent.displayOut ) {
+			if ( this.frameDebugger && this.frameDebugger.enable ) {
 
-				this.bufferViewer.draw();
+				this.frameDebugger.draw();
 
 			}
 
@@ -147,9 +154,9 @@ export class Scene extends GLP.EventEmitter {
 
 		if ( process.env.NODE_ENV == "development" ) {
 
-			if ( this.bufferViewer ) {
+			if ( this.frameDebugger ) {
 
-				this.bufferViewer.resize( resolution );
+				this.frameDebugger.resize( resolution );
 
 			}
 

@@ -428,7 +428,7 @@ export class Renderer extends MXP.Entity {
 
 		}
 
-		this.emit( "drawPass", [ renderTarget ] );
+		this.emit( "drawPass", [ renderTarget, "camera/" + renderType ] );
 
 	}
 
@@ -530,7 +530,7 @@ export class Renderer extends MXP.Entity {
 
 			}
 
-			this.emit( "drawPass", [ pass.renderTarget ] );
+			this.emit( "drawPass", [ pass.renderTarget, pass.name ] );
 
 		}
 
