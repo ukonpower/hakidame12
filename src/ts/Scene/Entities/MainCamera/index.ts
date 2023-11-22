@@ -12,9 +12,7 @@ import colorCollectionFrag from './shaders/colorCollection.fs';
 import fxaaFrag from './shaders/fxaa.fs';
 import bloomBlurFrag from './shaders/bloomBlur.fs';
 import bloomBrightFrag from './shaders/bloomBright.fs';
-import lightShaftFrag from './shaders/lightShaft.fs';
 import ssrFrag from './shaders/ssr.fs';
-import ssaoFrag from './shaders/ssao.fs';
 import dofCoc from './shaders/dofCoc.fs';
 import dofComposite from './shaders/dofComposite.fs';
 import dofBokeh from './shaders/dofBokeh.fs';
@@ -52,23 +50,12 @@ export class MainCamera extends MXP.Entity {
 	private rtBloomVertical: GLP.GLPowerFrameBuffer[];
 	private rtBloomHorizonal: GLP.GLPowerFrameBuffer[];
 
-	// light shaft
-
-	private lightShaft: MXP.PostProcessPass;
-	public rtLightShaft1: GLP.GLPowerFrameBuffer;
-	public rtLightShaft2: GLP.GLPowerFrameBuffer;
-
 	// ssr
 
 	private ssr: MXP.PostProcessPass;
 	public rtSSR1: GLP.GLPowerFrameBuffer;
 	public rtSSR2: GLP.GLPowerFrameBuffer;
 
-	// ssao
-
-	private ssao: MXP.PostProcessPass;
-	public rtSSAO1: GLP.GLPowerFrameBuffer;
-	public rtSSAO2: GLP.GLPowerFrameBuffer;
 
 	// ss composite
 
@@ -150,34 +137,6 @@ export class MainCamera extends MXP.Entity {
 			frag: colorCollectionFrag,
 		} );
 
-		// light shaft
-
-		this.rtLightShaft1 = new GLP.GLPowerFrameBuffer( gl ).setTexture( [
-			power.createTexture().setting( { magFilter: gl.LINEAR, minFilter: gl.LINEAR } ),
-		] );
-
-		this.rtLightShaft2 = new GLP.GLPowerFrameBuffer( gl ).setTexture( [
-			power.createTexture().setting( { magFilter: gl.LINEAR, minFilter: gl.LINEAR } ),
-		] );
-
-		this.lightShaft = new MXP.PostProcessPass( {
-			name: 'lightShaft',
-			frag: lightShaftFrag,
-			renderTarget: this.rtLightShaft1,
-			uniforms: GLP.UniformsUtils.merge( globalUniforms.time, {
-				uLightShaftBackBuffer: {
-					value: this.rtLightShaft2.textures[ 0 ],
-					type: '1i'
-				},
-				uDepthTexture: {
-					value: this.renderTarget.gBuffer.depthTexture,
-					type: '1i'
-				},
-			} ),
-			resolutionRatio: 0.5,
-			passThrough: true,
-		} );
-
 		// ssr
 
 		this.rtSSR1 = new GLP.GLPowerFrameBuffer( gl ).setTexture( [
@@ -226,77 +185,18 @@ export class MainCamera extends MXP.Entity {
 			passThrough: true,
 		} );
 
-		// ssao
-
-		this.rtSSAO1 = new GLP.GLPowerFrameBuffer( gl ).setTexture( [
-			power.createTexture().setting( { magFilter: gl.LINEAR, minFilter: gl.LINEAR } ),
-		] );
-
-		this.rtSSAO2 = new GLP.GLPowerFrameBuffer( gl ).setTexture( [
-			power.createTexture().setting( { magFilter: gl.LINEAR, minFilter: gl.LINEAR } ),
-		] );
-
-		this.ssao = new MXP.PostProcessPass( {
-			name: 'ssao',
-			frag: ssaoFrag,
-			renderTarget: this.rtSSAO1,
-			uniforms: GLP.UniformsUtils.merge( globalUniforms.time, {
-				uResolution: {
-					value: this.resolution,
-					type: '2fv',
-				},
-				uResolutionInv: {
-					value: this.resolutionInv,
-					type: '2fv',
-				},
-				uGbufferPos: {
-					value: this.renderTarget.gBuffer.textures[ 0 ],
-					type: '1i'
-				},
-				uGbufferNormal: {
-					value: this.renderTarget.gBuffer.textures[ 1 ],
-					type: '1i'
-				},
-				uSSAOBackBuffer: {
-					value: this.rtSSR2.textures[ 0 ],
-					type: '1i'
-				},
-				uDepthTexture: {
-					value: this.renderTarget.gBuffer.depthTexture,
-					type: '1i'
-				},
-			} ),
-			passThrough: true,
-		} );
-
 		// ss-composite
 
 		this.ssComposite = new MXP.PostProcessPass( {
 			name: 'ssComposite',
 			frag: ssCompositeFrag,
 			uniforms: GLP.UniformsUtils.merge( this.commonUniforms, {
-				uGbufferPos: {
-					value: this.renderTarget.gBuffer.textures[ 0 ],
-					type: '1i'
-				},
 				uGbufferNormal: {
 					value: this.renderTarget.gBuffer.textures[ 1 ],
 					type: '1i'
 				},
-				uGbufferEmission: {
-					value: this.renderTarget.forwardBuffer.textures[ 3 ],
-					type: '1i'
-				},
-				uLightShaftTexture: {
-					value: this.rtLightShaft2.textures[ 0 ],
-					type: '1i'
-				},
 				uSSRTexture: {
 					value: this.rtSSR2.textures[ 0 ],
-					type: '1i'
-				},
-				uSSAOTexture: {
-					value: this.rtSSAO2.textures[ 0 ],
 					type: '1i'
 				},
 			} ),
@@ -587,16 +487,14 @@ export class MainCamera extends MXP.Entity {
 			input: this.renderTarget.shadingBuffer.textures,
 			passes: [
 				this.colorCollection,
-				this.lightShaft,
 				this.ssr,
-				this.ssao,
 				this.ssComposite,
-				// this.dofCoc,
-				// this.dofBokeh,
-				// this.dofComposite,
-				// this.motionBlurTile,
-				// this.motionBlurNeighbor,
-				// this.motionBlur,
+				this.dofCoc,
+				this.dofBokeh,
+				this.dofComposite,
+				this.motionBlurTile,
+				this.motionBlurNeighbor,
+				this.motionBlur,
 			]
 		} ) );
 
@@ -689,35 +587,15 @@ export class MainCamera extends MXP.Entity {
 
 		this.dofParams.set( focusDistance, maxCoc, rcpMaxCoC, coeff );
 
-		// light shaft swap
-
-		let tmp = this.rtLightShaft1;
-		this.rtLightShaft1 = this.rtLightShaft2;
-		this.rtLightShaft2 = tmp;
-
-		this.lightShaft.setRendertarget( this.rtLightShaft1 );
-		this.ssComposite.uniforms.uLightShaftTexture.value = this.rtLightShaft1.textures[ 0 ];
-		this.lightShaft.uniforms.uLightShaftBackBuffer.value = this.rtLightShaft2.textures[ 0 ];
-
 		// ssr swap
 
-		tmp = this.rtSSR1;
+		const tmp = this.rtSSR1;
 		this.rtSSR1 = this.rtSSR2;
 		this.rtSSR2 = tmp;
 
 		this.ssr.setRendertarget( this.rtSSR1 );
 		this.ssComposite.uniforms.uSSRTexture.value = this.rtSSR1.textures[ 0 ];
 		this.ssr.uniforms.uSSRBackBuffer.value = this.rtSSR2.textures[ 0 ];
-
-		// ssao swap
-
-		tmp = this.rtSSAO1;
-		this.rtSSAO1 = this.rtSSAO2;
-		this.rtSSAO2 = tmp;
-
-		this.ssao.setRendertarget( this.rtSSAO1 );
-		this.ssComposite.uniforms.uSSAOTexture.value = this.rtSSAO1.textures[ 0 ];
-		this.ssao.uniforms.uSSAOBackBuffer.value = this.rtSSAO2.textures[ 0 ];
 
 	}
 

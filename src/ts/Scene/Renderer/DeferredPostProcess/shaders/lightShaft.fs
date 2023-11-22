@@ -110,6 +110,6 @@ void main( void ) {
 
 	}
 
-	outColor = vec4( mix( texture( uLightShaftBackBuffer, vUv ).xyz, lightShaftSum, 0.9), 1.0 );
+	outColor = vec4( mix( texture( uLightShaftBackBuffer, vUv ).xyz, lightShaftSum, 0.5), 1.0 );
 
 }

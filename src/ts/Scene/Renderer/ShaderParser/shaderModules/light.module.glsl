@@ -1,8 +1,8 @@
  //[
 
-// outColor.xyz += 0.4;
-
 float shadow;
+
+float occulusion =  max( 0.0, 1.0 - geo.occulusion * 4.0 );
 
 // direcitonalLight
 
@@ -25,7 +25,7 @@ LightCamera lightCamera;
 		light.direction = dLight.direction;
 		light.color = dLight.color;
 
-		outColor.xyz += RE( geo, mat, light ) * shadow;
+		outColor.xyz += RE( geo, mat, light ) * shadow * occulusion;
 
 	#pragma loop_end
 
@@ -66,7 +66,7 @@ LightCamera lightCamera;
 		light.color = sLight.color * spotAttenuation * pow( clamp( 1.0 - spotDistance / sLight.distance, 0.0, 1.0 ),  sLight.decay );
 
 		radiance = RE( geo, mat, light );
-		outColor.xyz += shadow * radiance;
+		outColor.xyz += shadow * radiance * occulusion;
 
 	#pragma loop_end
 

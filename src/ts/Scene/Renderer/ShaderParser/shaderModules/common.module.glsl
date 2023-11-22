@@ -11,6 +11,7 @@ struct Geometry {
 	float depth;
 	vec3 viewDir;
 	vec3 viewDirWorld;
+	float occulusion;
 };
 
 struct Material {

@@ -11,6 +11,9 @@ uniform sampler2D sampler2; // albedo, roughness
 uniform sampler2D sampler3; // emission, metalic
 uniform sampler2D sampler4; // velocity, env
 
+uniform sampler2D uSSAOTexture;
+uniform sampler2D uLightShaftTexture;
+
 #ifdef USE_ENV
 	uniform samplerCube uEnvTex;
 #endif
@@ -43,7 +46,8 @@ void main( void ) {
 		tex1.xyz,
 		0.0,
 		normalize( cameraPosition - tex0.xyz ),
-		vec3( 0.0 )
+		vec3( 0.0 ),
+		texture( uSSAOTexture, vUv ).x
 	);
 	Material mat = Material(
 		tex2.xyz,
@@ -75,6 +79,10 @@ void main( void ) {
 		outColor += mat.specularColor * texture( uEnvTex, refDir ).xyz * EF * envIntensity;
 
 	#endif
+
+	// light shaft
+	
+	outColor.xyz += texture( uLightShaftTexture, vUv ).xyz;
 
 	glFragOut0 = glFragOut1 = vec4( outColor.xyz, 1.0 );
 
