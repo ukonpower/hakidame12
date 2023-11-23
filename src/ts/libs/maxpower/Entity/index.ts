@@ -14,10 +14,13 @@ export type EntityUpdateEvent = {
 	time: number;
 	deltaTime: number;
 	matrix?: GLP.Matrix;
-	renderStack?: RenderStack;
 	visibility?: boolean;
 	forceDraw?: boolean
 }
+
+export type EntityFinalizeEvent = {
+	renderStack?: RenderStack;
+} & EntityUpdateEvent
 
 export type EntityResizeEvent = {
 	resolution: GLP.Vector
@@ -81,38 +84,17 @@ export class Entity extends GLP.EventEmitter {
 		Update
 	-------------------------------*/
 
-	// before
-
-	protected beforeUpdate( event:EntityUpdateEvent, cEvent: ComponentUpdateEvent ) {
-
-		this.components.forEach( c => {
-
-			c.preUpdate( cEvent );
-
-		} );
-
-	}
-
 	// update
 
 	public update( event: EntityUpdateEvent ) {
-
-		if ( ! event.renderStack ) event.renderStack = {
-			camera: [],
-			light: [],
-			deferred: [],
-			forward: [],
-			ui: [],
-			shadowMap: [],
-			envMap: [],
-			gpuCompute: [],
-		};
 
 		const childEvent = { ...event } as ComponentUpdateEvent;
 		childEvent.entity = this;
 		childEvent.matrix = this.matrixWorld;
 
-		// pre update
+		// update components
+
+		// pre
 
 		this.preUpdateImpl( event );
 
@@ -140,17 +122,55 @@ export class Entity extends GLP.EventEmitter {
 
 		}
 
-		// after
+		// post
 
-		this.afterUpdateImpl( event );
+		this.postUpdateImpl( event );
 
 		this.components.forEach( c => {
 
-			c.afterUpdate( childEvent );
+			c.postUpdate( childEvent );
 
 		} );
 
-		// stack
+		// children
+
+		for ( let i = 0; i < this.children.length; i ++ ) {
+
+			this.children[ i ].update( childEvent );
+
+		}
+
+	}
+
+	protected preUpdateImpl( event:EntityUpdateEvent ) {
+	}
+
+	protected updateImpl( event:EntityUpdateEvent ) {
+	}
+
+	protected postUpdateImpl( event:EntityUpdateEvent ) {
+	}
+
+	/*-------------------------------
+		Finalize
+	-------------------------------*/
+
+	public finalize( event:EntityFinalizeEvent ) {
+
+		if ( ! event.renderStack ) event.renderStack = {
+			camera: [],
+			light: [],
+			deferred: [],
+			forward: [],
+			ui: [],
+			shadowMap: [],
+			envMap: [],
+			gpuCompute: [],
+		};
+
+		const childEvent = { ...event } as ComponentUpdateEvent;
+		childEvent.entity = this;
+		childEvent.matrix = this.matrixWorld;
 
 		const visibility = ( event.visibility || event.visibility === undefined ) && this.visible;
 		childEvent.visibility = visibility;
@@ -192,11 +212,19 @@ export class Entity extends GLP.EventEmitter {
 
 		}
 
-		// children
+		// finalize
+
+		this.finalizeImpl( event );
+
+		this.components.forEach( c => {
+
+			c.finalize( childEvent );
+
+		} );
 
 		for ( let i = 0; i < this.children.length; i ++ ) {
 
-			this.children[ i ].update( childEvent );
+			this.children[ i ].finalize( childEvent );
 
 		}
 
@@ -204,13 +232,7 @@ export class Entity extends GLP.EventEmitter {
 
 	}
 
-	protected preUpdateImpl( event:EntityUpdateEvent ) {
-	}
-
-	protected updateImpl( event:EntityUpdateEvent ) {
-	}
-
-	protected afterUpdateImpl( event:EntityUpdateEvent ) {
+	protected finalizeImpl( event:EntityFinalizeEvent ) {
 	}
 
 	/*-------------------------------

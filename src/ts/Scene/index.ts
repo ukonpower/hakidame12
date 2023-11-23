@@ -126,9 +126,9 @@ export class Scene extends GLP.EventEmitter {
 			forceDraw: param && param.forceDraw
 		};
 
-		const renderStack = this.root.update( event );
+		this.root.update( event );
 
-		this.root.noticeRecursive( "finishUp", event );
+		const renderStack = this.root.finalize( event );
 
 		this.renderer.render( renderStack );
 

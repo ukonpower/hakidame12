@@ -1,8 +1,8 @@
 import * as GLP from 'glpower';
 
-import { Entity, EntityUpdateEvent } from '../Entity';
+import { Entity, EntityFinalizeEvent } from '../Entity';
 
-export type ComponentUpdateEvent = EntityUpdateEvent & {
+export type ComponentUpdateEvent = EntityFinalizeEvent & {
 	entity: Entity,
 }
 
@@ -62,11 +62,11 @@ export class Component extends GLP.EventEmitter {
 
 	}
 
-	public afterUpdate( event: ComponentUpdateEvent ) {
+	public postUpdate( event: ComponentUpdateEvent ) {
 
 		if ( this.entity ) {
 
-			this.afterUpdateImpl( event );
+			this.postUpdateImpl( event );
 
 		}
 
@@ -78,7 +78,19 @@ export class Component extends GLP.EventEmitter {
 
 	protected updateImpl( event: ComponentUpdateEvent ) {}
 
-	protected afterUpdateImpl( event: ComponentUpdateEvent ) {}
+	protected postUpdateImpl( event: ComponentUpdateEvent ) {}
+
+	public finalize( event: ComponentUpdateEvent ) {
+
+		if ( this.entity ) {
+
+			this.finalizeImpl( event );
+
+		}
+
+	}
+
+	protected finalizeImpl( event: ComponentUpdateEvent ) {}
 
 	public dispose() {
 

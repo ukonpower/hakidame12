@@ -52,14 +52,12 @@ export class OrbitControls extends MXP.Component {
 
 	}
 
-	protected afterUpdateImpl( event: MXP.ComponentUpdateEvent ): void {
+	protected finalizeImpl( event: MXP.ComponentUpdateEvent ): void {
 
 		const entity = event.entity;
 
-		const qua = new GLP.Quaternion().copy( event.entity.quaternion );
-
 		this.offsetPosTmp.set( this.offsetPos.x, - this.offsetPos.y, 0.0, 1.0 );
-		this.offsetPos.applyMatrix4( this.matrixTmp.identity().applyQuaternion( qua ) );
+
 		entity.matrixWorld.multiply( this.matrixTmp.identity().applyPosition( this.offsetPosTmp ) );
 
 		// calc viewmatrix

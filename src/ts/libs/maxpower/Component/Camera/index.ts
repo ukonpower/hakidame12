@@ -80,7 +80,7 @@ export class Camera extends Component {
 
 	}
 
-	protected afterUpdateImpl( event: ComponentUpdateEvent ): void {
+	protected postUpdateImpl( event: ComponentUpdateEvent ): void {
 
 		this.viewMatrixPrev.copy( this.viewMatrix );
 

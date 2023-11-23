@@ -29,48 +29,27 @@ export class LookAt extends MXP.Component {
 
 	}
 
-	protected setEntityImpl( entity: MXP.Entity | null ): void {
+	public finalizeImpl( event: MXP.ComponentUpdateEvent ): void {
 
-		this.emit( "setEntity" );
+		const entity = event.entity;
 
-		const onUpdate = this.calcMatrix.bind( this );
+		if ( this.target && this.enable ) {
 
-		if ( entity ) {
-
-			entity.on( 'notice/finishUp', onUpdate );
-
-		}
-
-		this.once( "setEntity", () => {
-
-			if ( entity ) {
-
-				entity.off( 'notice/finishUp', onUpdate );
-
-			}
-
-		} );
-
-	}
-
-	private calcMatrix() {
-
-		if ( this.entity && this.target && this.enable ) {
-
-			this.entity.matrixWorld.decompose( this.entityWorldPos );
+			entity.matrixWorld.decompose( this.entityWorldPos );
 			this.target.matrixWorld.decompose( this.targetWorldPos );
 
-			this.entity.matrixWorld.lookAt( this.entityWorldPos, this.targetWorldPos, this.up );
+			entity.matrixWorld.lookAt( this.entityWorldPos, this.targetWorldPos, this.up );
 
-			const camera = this.entity.getComponent<MXP.Camera>( 'camera' );
+			const camera = entity.getComponent<MXP.Camera>( 'camera' );
 
 			if ( camera ) {
 
-				camera.viewMatrix.copy( this.entity.matrixWorld ).inverse();
+				camera.viewMatrix.copy( entity.matrixWorld ).inverse();
 
 			}
 
 		}
+
 
 	}
 

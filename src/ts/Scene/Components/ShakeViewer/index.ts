@@ -21,57 +21,31 @@ export class ShakeViewer extends MXP.Component {
 
 	}
 
-	protected setEntityImpl( entity: MXP.Entity | null ): void {
+	public finalizeImpl( event: MXP.ComponentUpdateEvent ): void {
 
-		this.emit( "setEntity" );
+		const entity = event.entity;
 
-		const onUpdate = this.calcMatrix.bind( this );
+		let shake = 0.008 * this.shakePower;
 
-		if ( entity ) {
+		if ( this.cameraComponent ) {
 
-			entity.on( 'notice/finishUp', onUpdate );
+			shake *= this.cameraComponent.fov / 50.0;
 
 		}
 
-		this.once( "setEntity", () => {
+		const t = event.time * this.shakeSpeed;
 
-			if ( entity ) {
+		this.shakeQua.setFromEuler( { x: Math.sin( t * 2.0 ) * shake, y: Math.sin( t * 2.5 ) * shake, z: 0 } );
 
-				entity.off( 'notice/finishUp', onUpdate );
+		this.shakeMatrix.identity().applyQuaternion( this.shakeQua );
 
-			}
+		entity.matrixWorld.multiply( this.shakeMatrix );
 
-		} );
+		const camera = entity.getComponent<MXP.Camera>( 'camera' );
 
-	}
+		if ( camera ) {
 
-	private calcMatrix( event: MXP.ComponentUpdateEvent ) {
-
-		if ( this.entity ) {
-
-			let shake = 0.008 * this.shakePower;
-
-			if ( this.cameraComponent ) {
-
-				shake *= this.cameraComponent.fov / 50.0;
-
-			}
-
-			const t = event.time * this.shakeSpeed;
-
-			this.shakeQua.setFromEuler( { x: Math.sin( t * 2.0 ) * shake, y: Math.sin( t * 2.5 ) * shake, z: 0 } );
-
-			this.shakeMatrix.identity().applyQuaternion( this.shakeQua );
-
-			this.entity.matrixWorld.multiply( this.shakeMatrix );
-
-			const camera = this.entity.getComponent<MXP.Camera>( 'camera' );
-
-			if ( camera ) {
-
-				camera.viewMatrix.copy( this.entity.matrixWorld ).inverse();
-
-			}
+			camera.viewMatrix.copy( entity.matrixWorld ).inverse();
 
 		}
 
