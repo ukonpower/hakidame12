@@ -29,7 +29,6 @@ export class DeferredPostProcess extends MXP.PostProcess {
 
 	constructor() {
 
-
 		// light shaft
 
 		const rtLightShaft1 = new GLP.GLPowerFrameBuffer( gl ).setTexture( [
@@ -82,6 +81,7 @@ export class DeferredPostProcess extends MXP.PostProcess {
 					type: '1i'
 				},
 			} ),
+			resolutionRatio: 1.0,
 			passThrough: true,
 		} );
 
@@ -98,6 +98,10 @@ export class DeferredPostProcess extends MXP.PostProcess {
 				uSSAOTexture: {
 					value: null,
 					type: '1i'
+				},
+				uSSAOResolutionInv: {
+					value: ssao.resolutionInv,
+					type: '2fv'
 				}
 			} )
 		} );

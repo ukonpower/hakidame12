@@ -110,7 +110,7 @@ export class MainCamera extends MXP.Entity {
 		this.addComponent( "controls", new OrbitControls( window.document.body ) );
 		this.addComponent( 'shakeViewer', new ShakeViewer( 0.5, 1.0 ) );
 
-		// this.addComponent( "rotate", new RotateViewer( 5 ) );
+		this.addComponent( "rotate", new RotateViewer( 5 ) );
 
 		// resolution
 
@@ -192,6 +192,10 @@ export class MainCamera extends MXP.Entity {
 			name: 'ssComposite',
 			frag: ssCompositeFrag,
 			uniforms: GLP.UniformsUtils.merge( this.commonUniforms, {
+				uGbufferPos: {
+					value: this.renderTarget.gBuffer.textures[ 0 ],
+					type: '1i'
+				},
 				uGbufferNormal: {
 					value: this.renderTarget.gBuffer.textures[ 1 ],
 					type: '1i'
@@ -490,9 +494,9 @@ export class MainCamera extends MXP.Entity {
 				this.colorCollection,
 				this.ssr,
 				this.ssComposite,
-				// this.dofCoc,
-				// this.dofBokeh,
-				// this.dofComposite,
+				this.dofCoc,
+				this.dofBokeh,
+				this.dofComposite,
 				// this.motionBlurTile,
 				// this.motionBlurNeighbor,
 				// this.motionBlur,

@@ -12,6 +12,8 @@ uniform sampler2D sampler3; // emission, metalic
 uniform sampler2D sampler4; // velocity, env
 
 uniform sampler2D uSSAOTexture;
+uniform vec2 uSSAOResolutionInv;
+
 uniform sampler2D uLightShaftTexture;
 
 #ifdef USE_ENV
@@ -41,13 +43,41 @@ void main( void ) {
 	vec4 tex3 = texture( sampler3, vUv );
 	vec4 tex4 = texture( sampler4, vUv );
 
+	float occlusion = 0.0;
+
+	vec2 offset = vec2( uSSAOResolutionInv ) * 2.0;	
+
+	occlusion += texture( uSSAOTexture, vUv + vec2( -offset.x, offset.y ) ).x;
+	occlusion += texture( uSSAOTexture, vUv + vec2( 0.0, offset.y ) ).x;
+	occlusion += texture( uSSAOTexture, vUv + vec2( offset.x, offset.y ) ).x;
+	occlusion += texture( uSSAOTexture, vUv + vec2( -offset.x, 0.0 ) ).x;
+	occlusion += texture( uSSAOTexture, vUv + vec2( 0.0, 0.0 ) ).x;
+	occlusion += texture( uSSAOTexture, vUv + vec2( offset.x, 0.0 ) ).x;
+	occlusion += texture( uSSAOTexture, vUv + vec2( -offset.x, -offset.y ) ).x;
+	occlusion += texture( uSSAOTexture, vUv + vec2( 0.0, -offset.y ) ).x;
+	occlusion += texture( uSSAOTexture, vUv + vec2( offset.x, -offset.y ) ).x;
+	
+	offset = vec2( uSSAOResolutionInv ) * 4.0;	
+
+	occlusion += texture( uSSAOTexture, vUv + vec2( -offset.x, offset.y ) ).x;
+	occlusion += texture( uSSAOTexture, vUv + vec2( 0.0, offset.y ) ).x;
+	occlusion += texture( uSSAOTexture, vUv + vec2( offset.x, offset.y ) ).x;
+	occlusion += texture( uSSAOTexture, vUv + vec2( -offset.x, 0.0 ) ).x;
+	occlusion += texture( uSSAOTexture, vUv + vec2( 0.0, 0.0 ) ).x;
+	occlusion += texture( uSSAOTexture, vUv + vec2( offset.x, 0.0 ) ).x;
+	occlusion += texture( uSSAOTexture, vUv + vec2( -offset.x, -offset.y ) ).x;
+	occlusion += texture( uSSAOTexture, vUv + vec2( 0.0, -offset.y ) ).x;
+	occlusion += texture( uSSAOTexture, vUv + vec2( offset.x, -offset.y ) ).x;
+
+	occlusion /= 18.0;
+	
 	Geometry geo = Geometry(
 		tex0.xyz,
 		tex1.xyz,
 		0.0,
 		normalize( cameraPosition - tex0.xyz ),
 		vec3( 0.0 ),
-		texture( uSSAOTexture, vUv ).x
+		occlusion
 	);
 	Material mat = Material(
 		tex2.xyz,

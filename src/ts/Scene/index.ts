@@ -118,7 +118,7 @@ export class Scene extends GLP.EventEmitter {
 		this.currentTime = currentTime;
 
 		globalUniforms.time.uTime.value = this.elapsedTime;
-		globalUniforms.time.uFractTime.value = this.elapsedTime;
+		globalUniforms.time.uFractTime.value = this.elapsedTime % 1;
 
 		const event: MXP.EntityUpdateEvent = {
 			time: this.elapsedTime,

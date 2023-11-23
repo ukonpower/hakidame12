@@ -2,7 +2,7 @@
 
 float shadow;
 
-float occulusion =  max( 0.0, 1.0 - geo.occulusion * 4.0 );
+float occulusionScaled =  max( 0.0, 1.0 - geo.occulusion * 4.0 );
 
 // direcitonalLight
 
@@ -15,17 +15,17 @@ LightCamera lightCamera;
 
 	#pragma loop_start NUM_LIGHT_DIR
 
-		// shadow
-
-		shadow = getShadowSmooth( tex0.xyz, directionalLightCamera[ LOOP_INDEX ], directionalLightShadowMap[ LOOP_INDEX ] );
-		
-		// lighting
-
 		dLight = directionalLight[ LOOP_INDEX ];
 		light.direction = dLight.direction;
 		light.color = dLight.color;
 
-		outColor.xyz += RE( geo, mat, light ) * shadow * occulusion;
+		// shadow
+
+		shadow = getShadowSmooth( tex0.xyz, directionalLightCamera[ LOOP_INDEX ], directionalLightShadowMap[ LOOP_INDEX ], ( 1.0 - dot( light.direction, geo.normal ) ) * 0.0075 );
+		
+		// lighting
+
+		outColor.xyz += RE( geo, mat, light ) * shadow * occulusionScaled;
 
 	#pragma loop_end
 
@@ -45,7 +45,7 @@ LightCamera lightCamera;
 
 		// shadow
 
-		shadow = getShadowSmooth( geo.position, spotLightCamera[ LOOP_INDEX ], spotLightShadowMap[ LOOP_INDEX ] );
+		shadow = getShadowSmooth( geo.position, spotLightCamera[ LOOP_INDEX ], spotLightShadowMap[ LOOP_INDEX ], 0.01 );
 
 		// lighting
 
@@ -66,7 +66,7 @@ LightCamera lightCamera;
 		light.color = sLight.color * spotAttenuation * pow( clamp( 1.0 - spotDistance / sLight.distance, 0.0, 1.0 ),  sLight.decay );
 
 		radiance = RE( geo, mat, light );
-		outColor.xyz += shadow * radiance * occulusion;
+		outColor.xyz += shadow * radiance * occulusionScaled;
 
 	#pragma loop_end
 

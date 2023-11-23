@@ -28,6 +28,8 @@ void main( void ) {
 	vec3 dir = normalize( cameraPosition - gCol0.xyz );
 	float f = fresnel( dot( dir, gCol1.xyz ) );
 
-	outColor += texture( uSSRTexture, vUv ) * 0.3 * f;
+	vec4 ssrCol = texture( uSSRTexture, vUv );
+
+	outColor.xyz = mix( outColor.xyz, ssrCol.xyz, f * ssrCol.w * 0.5 );
 
 }

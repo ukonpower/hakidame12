@@ -39,7 +39,7 @@ export class Light extends ShadowMapCamera {
 
 		param.far = param.far ?? 100;
 
-		super( { ...param, renderTarget: param.useShadowMap ? new GLP.GLPowerFrameBuffer( gl ).setTexture( [ new GLP.GLPowerTexture( gl ) ] ).setSize( new GLP.Vector( 512, 512 ) ) : null } );
+		super( { ...param, renderTarget: param.useShadowMap ? new GLP.GLPowerFrameBuffer( gl ).setTexture( [ new GLP.GLPowerTexture( gl ).setting( { magFilter: gl.LINEAR, minFilter: gl.LINEAR } ) ] ).setSize( new GLP.Vector( 512, 512 ) ) : null } );
 
 		this.lightType = param.lightType;
 

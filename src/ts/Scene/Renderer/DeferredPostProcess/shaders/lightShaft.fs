@@ -67,7 +67,7 @@ void main( void ) {
 
 				dLight = directionalLight[ LOOP_INDEX ];
 
-				lightShaftSum += dLight.color * ( getShadow( rayPos, directionalLightCamera[ LOOP_INDEX ], directionalLightShadowMap[ LOOP_INDEX ] )) * rayStepLength * 0.0025;
+				lightShaftSum += dLight.color * ( getShadow( rayPos, directionalLightCamera[ LOOP_INDEX ], directionalLightShadowMap[ LOOP_INDEX ], 0.0 ) ) * rayStepLength * 0.0025;
 
 			#pragma loop_end
 		
@@ -100,7 +100,7 @@ void main( void ) {
 				}
 
 				lightShaftSum += sLight.color * 
-					getShadow( rayPos, spotLightCamera[ LOOP_INDEX ], spotLightShadowMap[ LOOP_INDEX ] ) * 
+					getShadow( rayPos, spotLightCamera[ LOOP_INDEX ], spotLightShadowMap[ LOOP_INDEX ], 0.0 ) * 
 					spotAttenuation * pow( clamp( 1.0 - spotDistance / sLight.distance, 0.0, 1.0 ),  sLight.decay * 1.9 ) *
 					rayStepLength * 0.02;
 

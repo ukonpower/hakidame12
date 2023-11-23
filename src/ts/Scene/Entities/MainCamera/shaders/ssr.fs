@@ -5,9 +5,9 @@
 
 // uniforms
 
+uniform sampler2D backbuffer0;
 uniform sampler2D uGbufferPos;
 uniform sampler2D uGbufferNormal;
-uniform sampler2D uSceneTex;
 uniform sampler2D uSSRBackBuffer;
 uniform sampler2D uDepthTexture;
 
@@ -39,7 +39,7 @@ void main( void ) {
 
 	if( abs(rayViewPos.z - depthRayPos.z) > 0.1 || length(rayPos - cameraPosition) > 100.0 ) {
 
-		outColor = vec4( 0.0, 0.0, 0.0, 1.0 );
+		outColor = vec4( 0.0, 0.0, 0.0, 0.0 );
 		return;
 		
 	}
@@ -54,7 +54,7 @@ void main( void ) {
 	float totalRayLength = random(vUv + uFractTime) * rayStepLength;
 	rayPos += rayDir * totalRayLength;
 
-	vec3 col;
+	vec4 col;
 
 	for( int i = 0; i < int( MARCH ); i ++ ) {
 
@@ -72,7 +72,8 @@ void main( void ) {
 
 		if( rayViewPos.z < depthViewPos.z && rayViewPos.z >= depthViewPos.z - 1.0 ) {
 
-			col = texture( uSceneTex, depthCoord.xy ).xyz;
+			col.xyz = texture( backbuffer0, depthCoord.xy ).xyz;
+			col.w = 1.0;
 			break;
 
 		}
@@ -82,6 +83,6 @@ void main( void ) {
 
 	}
 
-	outColor = vec4( mix( texture( uSSRBackBuffer, vUv ).xyz, col, 0.2 ), 1.0 );
+	outColor = mix( texture( uSSRBackBuffer, vUv ), col, 0.3 );
 
 }
