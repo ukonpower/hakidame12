@@ -36,7 +36,7 @@ export class Pointer extends EventEmitter {
 
 		const onDispose = () => {
 
-			if ( this.element ) this.unregisterElement( this.element );
+			if ( this.element ) this.removeElement( this.element );
 
 			window.removeEventListener( 'pointermove', onPointerMove );
 			window.removeEventListener( 'pointerup', onPointerUp );
@@ -51,9 +51,9 @@ export class Pointer extends EventEmitter {
 
 	}
 
-	public registerElement( elm: HTMLElement ) {
+	public setElement( elm: HTMLElement ) {
 
-		if ( this.element ) this.unregisterElement( this.element );
+		if ( this.element ) this.removeElement( this.element );
 
 		this.element = elm;
 
@@ -77,7 +77,7 @@ export class Pointer extends EventEmitter {
 
 	}
 
-	public unregisterElement( elm: HTMLElement ) {
+	public removeElement( elm: HTMLElement ) {
 
 		this.emit( "unregister", [ elm ] );
 

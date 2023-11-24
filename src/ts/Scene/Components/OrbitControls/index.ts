@@ -20,7 +20,7 @@ export class OrbitControls extends MXP.Component {
 		this.offsetPosTmp = new GLP.Vector();
 		this.matrixTmp = new GLP.Matrix();
 
-		this.pointer.registerElement( targetElm );
+		this.pointer.setElement( targetElm );
 
 		let touching = false;
 

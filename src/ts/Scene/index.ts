@@ -54,7 +54,7 @@ export class Scene extends GLP.EventEmitter {
 		// camera
 
 		this.camera = new MainCamera();
-		this.camera.position.set( 0, 0, 4 );
+		this.camera.position.set( 0, 1, 10 );
 		this.root.add( this.camera );
 
 		this.cameraComponent = this.camera.getComponent<RenderCamera>( 'camera' )!;
@@ -63,7 +63,16 @@ export class Scene extends GLP.EventEmitter {
 
 		this.carpenter = new Carpenter( this.root, this.camera );
 
-		// this.root.add( new HUD() );
+		// scene
+
+		const loader = new MXP.GLTFLoader();
+
+		loader.load( "/scene.glb" ).then( gltf => {
+
+			console.log( gltf );
+			this.root.add( gltf );
+
+		} );
 
 		// renderer
 

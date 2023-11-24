@@ -1,6 +1,5 @@
 import * as GLP from 'glpower';
 import * as MXP from 'maxpower';
-import { LightControls } from '~/ts/Scene/Components/LightControls';
 
 export class Lights extends MXP.Entity {
 

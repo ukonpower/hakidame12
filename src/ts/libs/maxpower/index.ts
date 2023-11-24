@@ -24,6 +24,10 @@ export * from './Component/PostProcessPass';
 
 export * from './Entity';
 
+// loaders
+
+export * from './Loaders/GLTFLoader';
+
 // utils
 
 export * from './Utils/Hot';

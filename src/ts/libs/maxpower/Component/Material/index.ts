@@ -42,9 +42,11 @@ export class Material extends Component {
 	public visibilityFlag: MaterialVisibility;
 	public programCache: MaterialProgramCache;
 
-	constructor( opt: MaterialParam ) {
+	constructor( opt?: MaterialParam ) {
 
 		super();
+
+		opt = opt || {};
 
 		this.name = opt.name || '';
 		this.type = opt.type || [ "deferred", "shadowMap" ];

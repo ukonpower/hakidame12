@@ -108,9 +108,8 @@ export class MainCamera extends MXP.Entity {
 
 		const lookAt = this.addComponent( 'lookAt', new LookAt() );
 		this.addComponent( "controls", new OrbitControls( window.document.body ) );
-		this.addComponent( 'shakeViewer', new ShakeViewer( 0.5, 1.0 ) );
-
-		this.addComponent( "rotate", new RotateViewer( 5 ) );
+		// this.addComponent( 'shakeViewer', new ShakeViewer( 0.5, 1.0 ) );
+		// this.addComponent( "rotate", new RotateViewer( 5 ) );
 
 		// resolution
 
@@ -641,7 +640,7 @@ export class MainCamera extends MXP.Entity {
 		this.cameraComponent.near = 0.01;
 		this.cameraComponent.far = 1000;
 		this.cameraComponent.aspect = resolution.x / resolution.y;
-		this.cameraComponent.fov = this.baseFov + Math.max( 0, 1 / this.cameraComponent.aspect - 1 ) * 20.0;
+		this.cameraComponent.fov = this.baseFov + 5.0 + Math.max( 0, 1 / this.cameraComponent.aspect - 1 ) * 30.0;
 		this.cameraComponent.needsUpdate = true;
 
 	}
