@@ -47,17 +47,39 @@ export interface GLTFImage {
 export interface GLTFMaterialElement {
     doubleSided: boolean;
     name: string;
-    pbrMetallicRoughness: GLTFPbrMetallicRoughness;
+    pbrMetallicRoughness?: GLTFPbrMetallicRoughness;
+    emissiveTexture?: GLTFMaterialTexture;
+    extensions?: GLTFMaterialExtensions;
 }
 
 export interface GLTFPbrMetallicRoughness {
-    baseColorTexture: GLTFBaseColorTexture;
-    metallicFactor: number;
-    roughnessFactor: number;
+    baseColorTexture?: GLTFMaterialTexture;
+    baseColorFactor?: number[]
+    metallicRoughnessTexture?:GLTFMaterialTexture;
+    metallicFactor?: number;
+    roughnessFactor?: number;
 }
 
-export interface GLTFBaseColorTexture {
+export interface GLTFMaterialTexture {
     index: number;
+}
+
+export interface GLTFMaterialExtensions {
+    KHR_materials_emissive_strength?: GLTFKHRMaterialsEmissiveStrength;
+    KHR_materials_specular?: GLTFKHRMaterialsSpecular;
+    KHR_materials_ior?: GLTFKHRMaterialsIor;
+}
+
+export interface GLTFKHRMaterialsEmissiveStrength {
+    emissiveStrength: number;
+}
+
+export interface GLTFKHRMaterialsIor {
+    ior: number;
+}
+
+export interface GLTFKHRMaterialsSpecular {
+    specularColorFactor: number[];
 }
 
 export interface GLTFMesh {

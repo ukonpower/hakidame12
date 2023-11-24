@@ -640,7 +640,7 @@ export class MainCamera extends MXP.Entity {
 		this.cameraComponent.near = 0.01;
 		this.cameraComponent.far = 1000;
 		this.cameraComponent.aspect = resolution.x / resolution.y;
-		this.cameraComponent.fov = this.baseFov + 5.0 + Math.max( 0, 1 / this.cameraComponent.aspect - 1 ) * 30.0;
+		this.cameraComponent.fov = this.baseFov + 8.0 + Math.max( 0, 1 / this.cameraComponent.aspect - 1 ) * 30.0;
 		this.cameraComponent.needsUpdate = true;
 
 	}

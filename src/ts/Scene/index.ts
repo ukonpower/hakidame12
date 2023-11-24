@@ -4,7 +4,7 @@ import * as MXP from 'maxpower';
 import { MainCamera } from './Entities/MainCamera';
 import { Renderer } from './Renderer';
 import { createTextures } from './Textures';
-import { gl, globalUniforms } from '../Globals';
+import { blidge, gl, globalUniforms } from '../Globals';
 import { Carpenter } from './Carpenter';
 import { RenderCamera } from '../libs/maxpower/Component/Camera/RenderCamera';
 import { FrameDebugger } from './FrameDebugger';
@@ -62,6 +62,12 @@ export class Scene extends GLP.EventEmitter {
 		// carpenter
 
 		this.carpenter = new Carpenter( this.root, this.camera );
+
+		blidge.on( "export_gltf", () => {
+
+			window.location.reload();
+
+		} );
 
 		// scene
 

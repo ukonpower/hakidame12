@@ -153,7 +153,7 @@ export class GLTFLoader extends GLP.EventEmitter {
 
 		const parsedImages = new Map<number, HTMLImageElement>();
 
-		const imgPrmList = gltfJson.images.map( ( img, i ) => {
+		const imgPrmList = ( gltfJson.images || [] ).map( ( img, i ) => {
 
 			return new Promise( ( resolve ) => {
 
@@ -189,9 +189,6 @@ export class GLTFLoader extends GLP.EventEmitter {
 
 		await Promise.all( imgPrmList );
 
-		console.log( parsedImages );
-
-
 		// materials
 
 		const parsedMaterials = new Map<number, Material>();
@@ -222,18 +219,28 @@ export class GLTFLoader extends GLP.EventEmitter {
 
 		gltfJson.materials.forEach( ( mat, i ) => {
 
-			const pbr = mat.pbrMetallicRoughness;
+			const material = new Material( {
+				frag: gltfFrag,
+			} );
 
-			console.log( pbr );
+			console.log( mat );
 
+			if ( mat.pbrMetallicRoughness ) {
 
-			if ( pbr ) {
-
-				const material = new Material( {
-					frag: gltfFrag,
-				} );
+				const pbr = mat.pbrMetallicRoughness;
 
 				// base color
+
+				if ( pbr.baseColorFactor ) {
+
+					material.uniforms.uBaseColor = {
+						value: pbr.baseColorFactor,
+						type: "4fv"
+					};
+
+					material.defines[ "USE_COLOR" ] = "";
+
+				}
 
 				if ( pbr.baseColorTexture ) {
 
@@ -241,21 +248,108 @@ export class GLTFLoader extends GLP.EventEmitter {
 
 					if ( tex ) {
 
-						material.uniforms.uBaseColorTex = {
+						material.uniforms.uBaseColorMap = {
 							value: tex,
 							type: "1i"
 						};
 
-						material.defines[ "USE_MAP" ] = "";
+						material.defines[ "USE_COLOR_MAP" ] = "";
 
 					}
 
 				}
 
-				parsedMaterials.set( i, material );
+				// metalness roughness
+
+				if ( pbr.roughnessFactor !== undefined ) {
+
+					material.uniforms.uRoughness = {
+						value: pbr.roughnessFactor,
+						type: "1f"
+					};
+
+					material.defines[ "USE_ROUGHNESS" ] = "";
+
+				}
+
+				if ( pbr.metallicFactor !== undefined ) {
+
+					material.uniforms.uMetalness = {
+						value: pbr.metallicFactor,
+						type: "1f"
+					};
+
+					material.defines[ "USE_METALNESS" ] = "";
+
+				}
+
+				if ( pbr.metallicRoughnessTexture ) {
+
+					const tex = getTexture( pbr.metallicRoughnessTexture.index );
+
+					if ( tex ) {
+
+						material.uniforms.uMRMap = {
+							value: tex,
+							type: "1i"
+						};
+
+						material.defines[ "USE_MR_MAP" ] = "";
+
+					}
+
+				}
 
 			}
 
+			// emission
+
+			if ( mat.emissiveFactor ) {
+
+				material.uniforms.uEmission = {
+					value: mat.emissiveFactor,
+					type: "3fv"
+				};
+
+				material.defines[ "USE_EMISSION" ] = "";
+
+			}
+
+			if ( mat.emissiveTexture ) {
+
+				const tex = getTexture( mat.emissiveTexture.index );
+
+				if ( tex ) {
+
+					material.uniforms.uEmissionMap = {
+						value: tex,
+						type: "1i"
+					};
+
+					material.defines[ "USE_EMISSION_MAP" ] = "";
+
+				}
+
+			}
+
+			// extensions
+
+			if ( mat.extensions ) {
+
+				if ( mat.extensions.KHR_materials_emissive_strength ) {
+
+					material.uniforms.uEmissionStrength = {
+						value: mat.extensions.KHR_materials_emissive_strength.emissiveStrength,
+						type: "1fv"
+					};
+
+					material.defines[ "USE_EMISSION_STRENGTH" ] = "";
+
+				}
+
+			}
+
+			parsedMaterials.set( i, material );
 
 		} );
 
