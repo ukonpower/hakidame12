@@ -32,6 +32,10 @@ export * from './Loaders/GLTFLoader';
 
 export * from './Utils/Hot';
 
+// curve
+
+export * from './Utils/Curve';
+
 // blidge
 
 export * from './BLidge';

@@ -1,6 +1,6 @@
 import * as GLP from 'glpower';
 import { Geometry } from '../../Component/Geometry';
-import { GLTF, GLTFBaseColorTexture, GLTFBufferView, GLTFNode } from './gltf';
+import { GLTF, GLTFBufferView, GLTFNode } from './gltf';
 import { Entity } from '../../Entity';
 import { Material } from '../../Component/Material';
 
@@ -75,24 +75,32 @@ export class GLTFLoader extends GLP.EventEmitter {
 				type: dataView.getUint32( jsonOffset + 4, true )
 			};
 
-			const bufferOffset = GLB_HEADER_LENGTH + GLB_CHUNK_HEADER_LENGTH + jsonHeader.length;
-
-			const bufferHeader = {
-				length: dataView.getUint32( bufferOffset, true ),
-				type: dataView.getUint32( bufferOffset + 4, true )
-			};
-
-			if ( jsonHeader.type == 0x4E4F534A && bufferHeader.type == 0x004E4942 ) {
+			if ( jsonHeader.type == 0x4E4F534A ) {
 
 				const jsonBodyOffset = GLB_HEADER_LENGTH + GLB_CHUNK_HEADER_LENGTH;
 
 				json = JSON.parse( textDecoder.decode( new Uint8Array( data, jsonBodyOffset, jsonHeader.length ) ) );
 
-				const bufferBodyOffset = bufferOffset + GLB_CHUNK_HEADER_LENGTH;
+			}
 
-				const buffer = data.slice( bufferBodyOffset, bufferBodyOffset + bufferHeader.length );
+			if ( data.byteLength > GLB_CHUNK_HEADER_LENGTH + jsonHeader.length + GLB_HEADER_LENGTH ) {
 
-				buffers.set( 0, buffer );
+				const bufferOffset = GLB_HEADER_LENGTH + GLB_CHUNK_HEADER_LENGTH + jsonHeader.length;
+
+				const bufferHeader = {
+					length: dataView.getUint32( bufferOffset, true ),
+					type: dataView.getUint32( bufferOffset + 4, true )
+				};
+
+				if ( bufferHeader.type == 0x004E4942 ) {
+
+					const bufferBodyOffset = bufferOffset + GLB_CHUNK_HEADER_LENGTH;
+
+					const buffer = data.slice( bufferBodyOffset, bufferBodyOffset + bufferHeader.length );
+
+					buffers.set( 0, buffer );
+
+				}
 
 			}
 
@@ -109,8 +117,6 @@ export class GLTFLoader extends GLP.EventEmitter {
 		}
 
 		const gltfJson = json;
-
-		console.log( gltfJson );
 
 		const getBuffer = ( bufferView: GLTFBufferView ) => {
 
@@ -130,9 +136,11 @@ export class GLTFLoader extends GLP.EventEmitter {
 
 		const parsedAccessors = new Map<number, {buffer: ArrayBuffer, type: string}>();
 
-		json.accessors.forEach( ( accessor, i ) => {
+		json.accessors && json.accessors.forEach( ( accessor, i ) => {
 
 			const { type } = accessor;
+
+			if ( ! gltfJson.bufferViews ) return;
 
 			const bufferView = gltfJson.bufferViews[ accessor.bufferView ];
 
@@ -158,6 +166,8 @@ export class GLTFLoader extends GLP.EventEmitter {
 			return new Promise( ( resolve ) => {
 
 				if ( img.bufferView !== undefined ) {
+
+					if ( ! gltfJson.bufferViews ) return;
 
 					const bufferView = gltfJson.bufferViews[ img.bufferView ];
 
@@ -195,6 +205,8 @@ export class GLTFLoader extends GLP.EventEmitter {
 
 		const getTexture = ( index: number ) => {
 
+			if ( ! gltfJson.textures ) return null;
+
 			const gltfTexture = gltfJson.textures[ index ];
 
 			if ( gltfTexture ) {
@@ -217,7 +229,7 @@ export class GLTFLoader extends GLP.EventEmitter {
 
 		};
 
-		gltfJson.materials.forEach( ( mat, i ) => {
+		gltfJson.materials && gltfJson.materials.forEach( ( mat, i ) => {
 
 			const material = new Material( {
 				frag: gltfFrag,
@@ -476,7 +488,11 @@ export class GLTFLoader extends GLP.EventEmitter {
 
 					} else {
 
-						entity.add( createEntity( childNodeNum, gltfJson.nodes[ childNodeNum ] ) );
+						if ( gltfJson.nodes ) {
+
+							entity.add( createEntity( childNodeNum, gltfJson.nodes[ childNodeNum ] ) );
+
+						}
 
 					}
 
@@ -490,7 +506,7 @@ export class GLTFLoader extends GLP.EventEmitter {
 
 		} );
 
-		gltfJson.nodes.forEach( ( node, i ) => {
+		gltfJson.nodes && gltfJson.nodes.forEach( ( node, i ) => {
 
 			createEntity( i, node );
 
@@ -498,17 +514,23 @@ export class GLTFLoader extends GLP.EventEmitter {
 
 		const scene = new Entity();
 
-		gltfJson.scenes[ 0 ].nodes.forEach( nodeNum => {
+		const sceneNode = gltfJson.scenes && gltfJson.scenes[ 0 ];
 
-			const entity = parsedNode.get( nodeNum );
+		if ( sceneNode && sceneNode.nodes ) {
 
-			if ( entity ) {
+			sceneNode.nodes.forEach( nodeNum => {
 
-				scene.add( entity );
+				const entity = parsedNode.get( nodeNum );
 
-			}
+				if ( entity ) {
 
-		} );
+					scene.add( entity );
+
+				}
+
+			} );
+
+		}
 
 		return scene;
 

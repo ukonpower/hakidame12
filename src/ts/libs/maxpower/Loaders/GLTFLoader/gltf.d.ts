@@ -1,16 +1,16 @@
 export interface GLTF {
-    asset: GLTFAsset;
-    scene: number;
-    scenes: GLTFScene[];
-    nodes: GLTFNode[];
-    materials: GLTFMaterialElement[];
-    meshes: GLTFMesh[];
-    textures: GLTFTexture[];
-    images: GLTFImage[];
-    accessors: GLTFAccessor[];
-    bufferViews: GLTFBufferView[];
-    samplers: GLTFSampler[];
-    buffers: Buffer[];
+    asset?: GLTFAsset;
+    scene?: number;
+    scenes?: GLTFScene[];
+    nodes?: GLTFNode[];
+    materials?: GLTFMaterialElement[];
+    meshes?: GLTFMesh[];
+    textures?: GLTFTexture[];
+    images?: GLTFImage[];
+    accessors?: GLTFAccessor[];
+    bufferViews?: GLTFBufferView[];
+    samplers?: GLTFSampler[];
+    buffers?: Buffer[];
 }
 
 export interface GLTFAccessor {
@@ -49,6 +49,7 @@ export interface GLTFMaterialElement {
     name: string;
     pbrMetallicRoughness?: GLTFPbrMetallicRoughness;
     emissiveTexture?: GLTFMaterialTexture;
+    emissiveFactor?: number[],
     extensions?: GLTFMaterialExtensions;
 }
 
@@ -121,7 +122,7 @@ export interface GLTFSampler {
 export interface GLTFScene {
     extras: GLTFSceneExtras;
     name: string;
-    nodes: number[];
+    nodes?: number[];
 }
 
 export interface GLTFSceneExtras {
