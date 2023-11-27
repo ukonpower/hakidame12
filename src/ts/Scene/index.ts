@@ -80,44 +80,6 @@ export class Scene extends GLP.EventEmitter {
 
 		} );
 
-		const curve = new MXP.Curve();
-
-		curve.setPoints( [
-			{ x: - 4, y: 0, z: 0 },
-			{ x: - 2, y: 2, z: - 3 },
-			{ x: 0, y: 0, z: 2 },
-			{ x: 2, y: 2, z: 0 },
-			{ x: 4, y: - 3, z: 0 },
-		] );
-
-		curve.points.forEach( item => {
-
-			const entity = new MXP.Entity();
-			entity.addComponent( "geometry", new MXP.SphereGeometry( 0.2 ) );
-			entity.addComponent( "material", new MXP.Material() );
-			entity.position.copy( item );
-			this.root.add( entity );
-
-		} );
-
-		const n = 100;
-
-		for ( let i = 0; i < n; i ++ ) {
-
-			const p = curve.getPoint( i / ( n - 1 ) );
-
-			const entity = new MXP.Entity();
-			entity.addComponent( "geometry", new MXP.CubeGeometry( 0.2, 0.2, 0.2 ) );
-			entity.addComponent( "material", new MXP.Material() );
-			entity.position.copy( p );
-			this.root.add( entity );
-
-			// console.log( p );
-
-
-		}
-
-
 		// renderer
 
 		this.renderer = new Renderer( );

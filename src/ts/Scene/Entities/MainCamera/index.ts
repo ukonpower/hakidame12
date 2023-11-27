@@ -491,11 +491,11 @@ export class MainCamera extends MXP.Entity {
 			input: this.renderTarget.shadingBuffer.textures,
 			passes: [
 				this.colorCollection,
-				this.ssr,
-				this.ssComposite,
-				this.dofCoc,
-				this.dofBokeh,
-				this.dofComposite,
+				// this.ssr,
+				// this.ssComposite,
+				// this.dofCoc,
+				// this.dofBokeh,
+				// this.dofComposite,
 				// this.motionBlurTile,
 				// this.motionBlurNeighbor,
 				// this.motionBlur,
@@ -505,8 +505,8 @@ export class MainCamera extends MXP.Entity {
 		this.addComponent( "postProcess", new MXP.PostProcess( {
 			input: this.renderTarget.uiBuffer.textures,
 			passes: [
-				this.bloomBright,
-				...this.bloomBlur,
+				// this.bloomBright,
+				// ...this.bloomBlur,
 				this.fxaa,
 				this.composite,
 			]

@@ -10,6 +10,7 @@ export * from './Component/GPUComputePass';
 
 export * from './Component/Geometry';
 export * from './Component/Geometry/CubeGeometry';
+export * from './Component/Geometry/CurveGeometry';
 export * from './Component/Geometry/CylinderGeometry';
 export * from './Component/Geometry/PlaneGeometry';
 export * from './Component/Geometry/RingGeometry';
