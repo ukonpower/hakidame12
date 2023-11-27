@@ -256,8 +256,10 @@ export class FrameDebugger extends GLP.EventEmitter {
 
 		} else {
 
-			const x = Math.floor( ( e.clientX ) / this.tilePixelSize.x );
-			const y = Math.floor( ( e.clientY ) / this.tilePixelSize.y );
+			const tileSize = new GLP.Vector( window.innerWidth / this.tile.x, window.innerHeight / this.tile.y );
+
+			const x = Math.floor( ( e.clientX ) / tileSize.x );
+			const y = Math.floor( ( e.clientY ) / tileSize.y );
 
 			this.focus = x + y * this.tile.x;
 

@@ -207,6 +207,8 @@ export class Vector {
 		this.z = zz;
 		this.w = 0;
 
+		return this;
+
 	}
 
 	public applyMatrix4( mat: Matrix ) {

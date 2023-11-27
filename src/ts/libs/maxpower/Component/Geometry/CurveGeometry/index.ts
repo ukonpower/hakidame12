@@ -4,7 +4,7 @@ import { Curve } from "../../../Utils/Curve";
 
 export class CurveGeometry extends Geometry {
 
-	constructor( curve: Curve, curveSegments: number = 24, radSegments: number = 8 ) {
+	constructor( curve: Curve, radius: number, curveSegments: number = 24, radSegments: number = 8 ) {
 
 		super();
 
@@ -13,28 +13,21 @@ export class CurveGeometry extends Geometry {
 		const uvArray: number[] = [];
 		const indexArray: number[] = [];
 
-		const futa = true;
-		const rad = 1.0;
-		const height = 1.0;
-
-		const tmpVector: GLP.Vector = new GLP.Vector();
-
 		const frenet = curve.getFrenetFrames( curveSegments + 1 );
 
 		for ( let i = 0; i <= curveSegments; i ++ ) {
 
-			const { pos, weight } = curve.getPoint( i / curveSegments );
+			const { position: pos, weight } = curve.getPoint( i / curveSegments );
+			const r = radius * weight;
 
 			const N = frenet.normals[ i ];
-			const B = frenet.binormals[ i ];
+			const B = frenet.bitangents[ i ];
 
 			for ( let j = 0; j < radSegments; j ++ ) {
 
 				const theta = Math.PI * 2.0 / radSegments * j;
 
 				if ( i <= curveSegments ) {
-
-					const radius = rad * weight;
 
 					const sin = Math.sin( theta );
 					const cos = - Math.cos( theta );
@@ -51,9 +44,9 @@ export class CurveGeometry extends Geometry {
 
 					normalArray.push( vec.x, vec.y, vec.z );
 
-					vec.x = pos.x + radius * vec.x;
-					vec.y = pos.y + radius * vec.y;
-					vec.z = pos.z + radius * vec.z;
+					vec.x = pos.x + r * vec.x;
+					vec.y = pos.y + r * vec.y;
+					vec.z = pos.z + r * vec.z;
 
 					posArray.push( vec.x, vec.y, vec.z );
 
