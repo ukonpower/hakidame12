@@ -13,6 +13,8 @@ export class CurveGeometry extends Geometry {
 		const uvArray: number[] = [];
 		const indexArray: number[] = [];
 
+		curveSegments -= 1;
+
 		const frenet = curve.getFrenetFrames( curveSegments + 1 );
 
 		for ( let i = 0; i <= curveSegments; i ++ ) {

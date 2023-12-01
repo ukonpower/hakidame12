@@ -1,11 +1,11 @@
 import * as GLP from 'glpower';
 import * as MXP from 'maxpower';
 
-
 export const canvas = document.createElement( "canvas" );
 export const gl = canvas.getContext( 'webgl2', { antialias: false } )!;
 export const power = new GLP.Power( gl );
 export const blidge = new MXP.BLidge();
+export const pane = new Pane();
 
 export const globalUniforms: {[key: string]: GLP.Uniforms} = {
 	time: {
@@ -52,7 +52,8 @@ export const globalUniforms: {[key: string]: GLP.Uniforms} = {
 -------------------------------*/
 
 import { GPUState } from '../libs/GPUState';
+import { Pane } from 'tweakpane';
 export const gpuState: GPUState | undefined = undefined;
 
-// import 'webgl-memory';
+import 'webgl-memory';
 // gpuState = new GPUState();
