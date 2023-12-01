@@ -11,6 +11,9 @@ const PlantParam = {
 		depth: { value: 3, opt: { min: 0, max: 5, step: 1 } },
 		radius: { value: 0.02, opt: { min: 0, max: 0.2, step: 0.01 } },
 		length: { value: 1.0, opt: { min: 0, max: 2, step: 0.01 } },
+		lengthMultiplier: { value: 0.9, opt: { min: 0, max: 2, step: 0.01 } },
+		start: { value: 0.1, opt: { min: 0, max: 1, step: 0.01 } },
+		end: { value: 0.3, opt: { min: 0, max: 1, step: 0.01 } },
 	},
 	seed: { value: 0, opt: { min: 0, max: 9999, step: 1 } }
 };
@@ -82,9 +85,9 @@ export class Plant extends MXP.Entity {
 
 				const w = ( i / ( segs - 1 ) );
 
-				const x = ( random() - 0.5 ) * 0.1;
+				const x = ( random() - 0.5 ) * 0.0;
 				const y = w * length;
-				const z = ( random() - 0.5 ) * 0.1;
+				const z = ( random() - 0.5 ) * 0.0;
 
 				points.push( {
 					x, y, z,
@@ -100,7 +103,7 @@ export class Plant extends MXP.Entity {
 			b.addComponent( "material", new MXP.Material() );
 
 			const ni = i + 1;
-			const nl = length * ( 0.6 - ( 1.0 - radius ) * 0.15 );
+			const nl = length * PlantParam.branch.lengthMultiplier.value;
 
 			if ( ni < PlantParam.branch.depth.value ) {
 
@@ -108,7 +111,7 @@ export class Plant extends MXP.Entity {
 
 				for ( let j = 0; j < branches; j ++ ) {
 
-					const point = curve.getPoint( j / ( branches - 1 ) * 0.5 + 0.4 );
+					const point = curve.getPoint( j / ( branches - 1 ) * ( PlantParam.branch.end.value - PlantParam.branch.start.value ) + PlantParam.branch.start.value );
 
 					const child = branch( ni, radius * point.weight, nl );
 					child.position.copy( point.position );
@@ -121,7 +124,6 @@ export class Plant extends MXP.Entity {
 			}
 
 			if ( i > 0 ) {
-
 
 				const point = curve.getPoint( 1 );
 
