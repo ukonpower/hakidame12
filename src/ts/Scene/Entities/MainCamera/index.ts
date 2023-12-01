@@ -108,8 +108,8 @@ export class MainCamera extends MXP.Entity {
 
 		const lookAt = this.addComponent( 'lookAt', new LookAt() );
 		this.addComponent( "controls", new OrbitControls( window.document.body ) );
-		// this.addComponent( 'shakeViewer', new ShakeViewer( 0.5, 1.0 ) );
-		this.addComponent( "rotate", new RotateViewer( 5 ) );
+		this.addComponent( 'shakeViewer', new ShakeViewer( 0.1, 1.0 ) );
+		// this.addComponent( "rotate", new RotateViewer( 5 ) );
 
 		// resolution
 
@@ -491,11 +491,11 @@ export class MainCamera extends MXP.Entity {
 			input: this.renderTarget.shadingBuffer.textures,
 			passes: [
 				this.colorCollection,
-				// this.ssr,
-				// this.ssComposite,
-				// this.dofCoc,
-				// this.dofBokeh,
-				// this.dofComposite,
+				this.ssr,
+				this.ssComposite,
+				this.dofCoc,
+				this.dofBokeh,
+				this.dofComposite,
 				// this.motionBlurTile,
 				// this.motionBlurNeighbor,
 				// this.motionBlur,
@@ -505,8 +505,8 @@ export class MainCamera extends MXP.Entity {
 		this.addComponent( "postProcess", new MXP.PostProcess( {
 			input: this.renderTarget.uiBuffer.textures,
 			passes: [
-				// this.bloomBright,
-				// ...this.bloomBlur,
+				this.bloomBright,
+				...this.bloomBlur,
 				this.fxaa,
 				this.composite,
 			]
@@ -582,7 +582,7 @@ export class MainCamera extends MXP.Entity {
 
 		const fov = this.cameraComponent.fov;
 		const focusDistance = this.tmpVector1.sub( this.tmpVector2 ).length();
-		const kFilmHeight = 0.012;
+		const kFilmHeight = 0.005;
 		const flocalLength = kFilmHeight / Math.tan( 0.5 * ( fov / 180 * Math.PI ) );
 
 		const maxCoc = ( 1 / this.dofBokeh.renderTarget!.size.y ) * ( 6 );

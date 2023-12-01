@@ -70,6 +70,8 @@ void main( void ) {
 	occlusion += texture( uSSAOTexture, vUv + vec2( offset.x, -offset.y ) ).x;
 
 	occlusion /= 18.0;
+
+	// occlusion *= 0.8;
 	
 	Geometry geo = Geometry(
 		tex0.xyz,

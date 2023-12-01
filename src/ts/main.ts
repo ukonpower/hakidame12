@@ -115,11 +115,11 @@ class App {
 
 		scale *= 1.0;
 
-		// const blkRatioX = canvasAspect < 1.0 ? 0.9 : 1.0;
-		// const blkRatioY = canvasAspect < 1.0 ? 0.7 : 0.9;
+		// const blkRatioX = canvasAspect < 1.0 ? 0.9 : 0.95;
+		// const blkRatioY = canvasAspect < 1.0 ? 0.9 : 0.95;
 
-		const blkRatioX = 1.0;
-		const blkRatioY = 1.0;
+		const blkRatioX = 0.9;
+		const blkRatioY = 0.9;
 
 		const width = window.innerWidth * blkRatioX;
 		const height = window.innerHeight * blkRatioY;

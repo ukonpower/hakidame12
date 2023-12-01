@@ -60,7 +60,7 @@ void main( void ) {
 		vec3 sampleOffset = (tangent * tDir.x + binormal * tDir.y + normal * tDir.z) * noise.z;
 		vec3 samplePos = rayPos + sampleOffset;
 
-		vec4 depthCoord = (projectionMatrix * viewMatrix * vec4(samplePos, 1.0 ) );
+		vec4 depthCoord = (projectionMatrix * viewMatrix * vec4( samplePos, 1.0 ) );
 		depthCoord.xy /= depthCoord.w;
 		depthCoord.xy = depthCoord.xy * 0.5 + 0.5;
 
@@ -71,7 +71,7 @@ void main( void ) {
 
 		if( sampleViewPos.z < depthViewPos.z && sampleViewPos.z >= depthViewPos.z - 1.0 ) {
 
-			occlusion += ( 1.0 - noise.z );
+			occlusion += pow( 1.0 - noise.z, 2.0 );
 
 		}
 		
