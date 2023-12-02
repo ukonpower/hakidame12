@@ -109,7 +109,7 @@ export class MainCamera extends MXP.Entity {
 		const lookAt = this.addComponent( 'lookAt', new LookAt() );
 		// this.addComponent( "controls", new OrbitControls( window.document.body ) );
 		this.addComponent( 'shakeViewer', new ShakeViewer( 0.1, 1.0 ) );
-		// this.addComponent( "rotate", new RotateViewer( 5 ) );
+		this.addComponent( "rotate", new RotateViewer( 2 ) );
 
 		// resolution
 
@@ -491,8 +491,8 @@ export class MainCamera extends MXP.Entity {
 			input: this.renderTarget.shadingBuffer.textures,
 			passes: [
 				this.colorCollection,
-				this.ssr,
-				this.ssComposite,
+				// this.ssr,
+				// this.ssComposite,
 				this.dofCoc,
 				this.dofBokeh,
 				this.dofComposite,

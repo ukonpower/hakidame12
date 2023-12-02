@@ -108,9 +108,11 @@ export class Curve extends GLP.EventEmitter {
 
 	public getFrenetFrames( segments: number ) {
 
+		const points: {position: GLP.IVector3, weight: number}[] = [];
 		const normals: GLP.Vector[] = [];
 		const bitangents: GLP.Vector[] = [];
 		const tangents: GLP.Vector[] = [];
+		const matrices: GLP.Matrix[] = [];
 
 		for ( let i = 0; i <= segments; i ++ ) {
 
@@ -121,6 +123,7 @@ export class Curve extends GLP.EventEmitter {
 			const p3 = this.getPosition( Math.max( t - d, 0.0 ) );
 
 			tangents[ i ] = new GLP.Vector().copy( p2.position ).sub( p3.position ).normalize();
+			points[ i ] = this.getPosition( t );
 
 		}
 
@@ -131,7 +134,6 @@ export class Curve extends GLP.EventEmitter {
 		const tx = Math.abs( tangents[ 0 ].x );
 		const ty = Math.abs( tangents[ 0 ].y );
 		const tz = Math.abs( tangents[ 0 ].z );
-
 
 		if ( tx <= min ) {
 
@@ -183,12 +185,28 @@ export class Curve extends GLP.EventEmitter {
 
 			bitangents[ i ].copy( tangents[ i ] ).cross( normals[ i ] ).normalize();
 
+			matrices[ i ] = new GLP.Matrix( [
+				normals[ i ].x, normals[ i ].y, normals[ i ].z, 0,
+				tangents[ i ].x, tangents[ i ].y, tangents[ i ].z, 0,
+				bitangents[ i ].x, bitangents[ i ].y, bitangents[ i ].z, 0,
+				0, 0, 0, 1.0
+			] );
+
+			// matrices[ i ] = new GLP.Matrix( [
+			// 	tangents[ i ].x, bitangents[ i ].y, normals[ i ].z, 0.0,
+			// 	tangents[ i ].x, bitangents[ i ].y, normals[ i ].z, 0.0,
+			// 	tangents[ i ].x, bitangents[ i ].y, normals[ i ].z, 0.0,
+			// 	0, 0, 0, 1.0
+			// ] );
+
 		}
 
 		return {
+			points,
 			normals,
 			bitangents,
 			tangents,
+			matrices
 		};
 
 	}

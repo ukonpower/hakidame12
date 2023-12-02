@@ -7,15 +7,19 @@ import { randomSeed } from '~/ts/libs/Math';
 
 const PlantParam = {
 	branch: {
-		num: { value: 4, opt: { min: 0, max: 10, step: 1 } },
-		depth: { value: 3, opt: { min: 0, max: 5, step: 1 } },
-		radius: { value: 0.02, opt: { min: 0, max: 0.2, step: 0.01 } },
-		length: { value: 1.0, opt: { min: 0, max: 2, step: 0.01 } },
-		lengthMultiplier: { value: 0.9, opt: { min: 0, max: 2, step: 0.01 } },
-		start: { value: 0.1, opt: { min: 0, max: 1, step: 0.01 } },
-		end: { value: 0.3, opt: { min: 0, max: 1, step: 0.01 } },
+		num: { value: 4, min: 0, max: 10, step: 1 },
+		depth: { value: 2, min: 0, max: 5, step: 1 },
+		radius: { value: 0.02, min: 0, max: 0.2, step: 0.01 },
+		length: { value: 0.2, min: 0, max: 2, step: 0.01 },
+		lengthMultiplier: { value: 0.9, min: 0, max: 2, step: 0.01 },
+		yOffset: { value: 0.1, min: 0, max: 1, step: 0.01 },
+		start: { value: 0.1, min: 0, max: 1, step: 0.01 },
+		end: { value: 0.3, min: 0, max: 1, step: 0.01 },
 	},
-	seed: { value: 0, opt: { min: 0, max: 9999, step: 1 } }
+	leaf: {
+		size: { value: 0.3, min: 0, max: 1, step: 0.01 },
+	},
+	seed: { value: 0, min: 0, max: 9999, step: 1 }
 };
 
 const _ = ( folder: FolderApi, o: any ) => {
@@ -29,19 +33,17 @@ const _ = ( folder: FolderApi, o: any ) => {
 
 		if ( typeof prop == "object" ) {
 
-			const f = folder.addFolder( { title: key } );
-
 			if ( prop.value !== undefined ) {
 
 				if ( typeof prop.value == "number" ) {
 
-					f.addBinding( prop, "value", prop.opt );
+					folder.addBinding( prop, "value", { ...prop, label: key } );
 
 				}
 
 			} else {
 
-				_( f, prop );
+				_( folder.addFolder( { title: key } ), prop );
 
 			}
 
@@ -65,7 +67,7 @@ export class Plant extends MXP.Entity {
 
 		super();
 
-		const branch = ( i : number, radius: number, length: number ): MXP.Entity => {
+		const branch = ( i : number, direction: GLP.Vector, radius: number, length: number ): MXP.Entity => {
 
 			const b = new MXP.Entity();
 
@@ -79,18 +81,18 @@ export class Plant extends MXP.Entity {
 				z: 0,
 			} );
 
-			const segs = 3;
+			const segs = 8;
 
 			for ( let i = 0; i < segs; i ++ ) {
 
 				const w = ( i / ( segs - 1 ) );
 
-				const x = ( random() - 0.5 ) * 0.0;
-				const y = w * length;
-				const z = ( random() - 0.5 ) * 0.0;
+				const p = new GLP.Vector();
+				p.add( direction.clone().multiply( length * w ) );
+				const offsetY = ( Math.log2( w + 1 ) ) * PlantParam.branch.yOffset.value;
 
 				points.push( {
-					x, y, z,
+					x: p.x, y: p.y + offsetY, z: p.z,
 					weight: ( 1.0 - w * 0.8 )
 				} );
 
@@ -113,9 +115,14 @@ export class Plant extends MXP.Entity {
 
 					const point = curve.getPoint( j / ( branches - 1 ) * ( PlantParam.branch.end.value - PlantParam.branch.start.value ) + PlantParam.branch.start.value );
 
-					const child = branch( ni, radius * point.weight, nl );
+					const nd = direction.clone();
+					nd.y *= 0.0;
+					const theta = random() * Math.PI * 2.0;
+					nd.x += Math.sin( theta );
+					nd.z += Math.cos( theta );
+
+					const child = branch( ni, nd, radius * point.weight, nl );
 					child.position.copy( point.position );
-					child.quaternion.multiply( new GLP.Quaternion().setFromEuler( new GLP.Euler( Math.PI / 4, random() * Math.PI * 2.0, 0, "ZYX" ) ) );
 
 					b.add( child );
 
@@ -123,17 +130,22 @@ export class Plant extends MXP.Entity {
 
 			}
 
-			if ( i > 0 ) {
+			if ( i > - 1 ) {
+
+				const frame = curve.getFrenetFrames( 5 );
 
 				const point = curve.getPoint( 1 );
 
 				const child = new MXP.Entity();
-				child.addComponent( "geometry", new MXP.PlaneGeometry( 0.1, 0.1 ) );
+				const size = PlantParam.leaf.size.value;
+
+				child.addComponent( "geometry", new MXP.PlaneGeometry( size, size ) );
 				child.addComponent( "material", new MXP.Material( { cullFace: false } ) );
 				child.position.copy( point.position );
 
-				b.add( child );
+				child.quaternion.multiply( new GLP.Quaternion().setFromMatrix( frame.matrices[ 4 ] ) );
 
+				b.add( child );
 
 			}
 
@@ -159,7 +171,7 @@ export class Plant extends MXP.Entity {
 			const radius = PlantParam.branch.radius.value;
 			const length = PlantParam.branch.length.value;
 
-			plant = branch( 0, radius, length );
+			plant = branch( 0, new GLP.Vector( 0.3, 1.0, 0.0 ), radius, length );
 
 			this.add( plant );
 
