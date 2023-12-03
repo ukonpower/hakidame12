@@ -106,10 +106,10 @@ export class MainCamera extends MXP.Entity {
 		this.cameraComponent = this.addComponent( "camera", new RenderCamera( gl ) );
 		this.renderTarget = this.cameraComponent.renderTarget;
 
-		const lookAt = this.addComponent( 'lookAt', new LookAt() );
-		// this.addComponent( "controls", new OrbitControls( window.document.body ) );
+		this.addComponent( "controls", new OrbitControls( window.document.body ) );
 		this.addComponent( 'shakeViewer', new ShakeViewer( 0.1, 1.0 ) );
-		this.addComponent( "rotate", new RotateViewer( 2 ) );
+		const lookAt = this.addComponent( 'lookAt', new LookAt() );
+		// this.addComponent( "rotate", new RotateViewer( 2 ) );
 
 		// resolution
 
@@ -491,11 +491,11 @@ export class MainCamera extends MXP.Entity {
 			input: this.renderTarget.shadingBuffer.textures,
 			passes: [
 				this.colorCollection,
-				// this.ssr,
-				// this.ssComposite,
-				this.dofCoc,
-				this.dofBokeh,
-				this.dofComposite,
+				this.ssr,
+				this.ssComposite,
+				// this.dofCoc,
+				// this.dofBokeh,
+				// this.dofComposite,
 				// this.motionBlurTile,
 				// this.motionBlurNeighbor,
 				// this.motionBlur,
@@ -582,10 +582,10 @@ export class MainCamera extends MXP.Entity {
 
 		const fov = this.cameraComponent.fov;
 		const focusDistance = this.tmpVector1.sub( this.tmpVector2 ).length();
-		const kFilmHeight = 0.005;
+		const kFilmHeight = 0.002;
 		const flocalLength = kFilmHeight / Math.tan( 0.5 * ( fov / 180 * Math.PI ) );
 
-		const maxCoc = ( 1 / this.dofBokeh.renderTarget!.size.y ) * ( 6 );
+		const maxCoc = ( 1 / this.dofBokeh.renderTarget!.size.y ) * ( 5 );
 		const rcpMaxCoC = 1.0 / maxCoc;
 		const coeff = flocalLength * flocalLength / ( 0.3 * ( focusDistance - flocalLength ) * kFilmHeight * 2.0 );
 
@@ -640,7 +640,7 @@ export class MainCamera extends MXP.Entity {
 		this.cameraComponent.near = 0.01;
 		this.cameraComponent.far = 1000;
 		this.cameraComponent.aspect = resolution.x / resolution.y;
-		this.cameraComponent.fov = this.baseFov + Math.max( 0, 1 / this.cameraComponent.aspect - 1 ) * 30.0;
+		this.cameraComponent.fov = this.baseFov;// + Math.max( 0, 1 / this.cameraComponent.aspect - 1 ) * 30.0;
 		this.cameraComponent.needsUpdate = true;
 
 	}

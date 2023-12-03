@@ -146,7 +146,7 @@ export class Renderer extends MXP.Entity {
 
 	public render( stack: RenderStack ) {
 
-		if ( process.env.NODE_ENV == 'development' && power.extDisJointTimerQuery ) {
+		if ( process.env.NODE_ENV == 'development' && power.extDisJointTimerQuery && gpuState ) {
 
 			const disjoint = gl.getParameter( power.extDisJointTimerQuery.GPU_DISJOINT_EXT );
 
@@ -762,7 +762,7 @@ export class Renderer extends MXP.Entity {
 
 				let query: WebGLQuery | null = null;
 
-				if ( process.env.NODE_ENV == 'development' && power.extDisJointTimerQuery ) {
+				if ( process.env.NODE_ENV == 'development' && power.extDisJointTimerQuery && gpuState ) {
 
 					query = this.queryList.pop() || null;
 
@@ -820,7 +820,7 @@ export class Renderer extends MXP.Entity {
 
 				// quer ------------------------
 
-				if ( process.env.NODE_ENV == 'development' ) {
+				if ( process.env.NODE_ENV == 'development' && gpuState ) {
 
 					if ( query ) {
 

@@ -73,12 +73,11 @@ export class Scene extends GLP.EventEmitter {
 
 		const loader = new MXP.GLTFLoader();
 
-		loader.load( "/scene.glb" ).then( gltf => {
+		// loader.load( "/scene.glb" ).then( gltf => {
 
-			console.log( gltf );
-			this.root.add( gltf );
+		// 	this.root.add( gltf );
 
-		} );
+		// } );
 
 		// renderer
 

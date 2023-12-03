@@ -1,67 +1,51 @@
 import * as GLP from 'glpower';
 import * as MXP from 'maxpower';
-import { FolderApi } from 'tweakpane';
-
-import { pane } from '~/ts/Globals';
+import { pane, paneRegister } from '~/ts/Globals/pane';
 import { randomSeed } from '~/ts/libs/Math';
 
-const PlantParam = {
+let PlantParam = {
+	root: {
+		num: { value: 2, min: 0, max: 10, step: 1 },
+		wide: { value: 0, min: 0.01, max: 2, step: 0.01 },
+	},
 	branch: {
-		num: { value: 4, min: 0, max: 10, step: 1 },
+		num: { value: 2, min: 0, max: 10, step: 1 },
 		depth: { value: 2, min: 0, max: 5, step: 1 },
-		radius: { value: 0.02, min: 0, max: 0.2, step: 0.01 },
-		length: { value: 0.2, min: 0, max: 2, step: 0.01 },
-		lengthMultiplier: { value: 0.9, min: 0, max: 2, step: 0.01 },
-		yOffset: { value: 0.1, min: 0, max: 1, step: 0.01 },
 		start: { value: 0.1, min: 0, max: 1, step: 0.01 },
 		end: { value: 0.3, min: 0, max: 1, step: 0.01 },
+		wide: { value: 0.2, min: 0, max: 2, step: 0.01 },
+		up: { value: 1.0, min: 0, max: 2, step: 0.01 },
+		curve: { value: 0.24, min: - 2, max: 2, step: 0.01 },
+		lengthMultiplier: { value: 0.9, min: 0, max: 2, step: 0.01 },
+	},
+	shape: {
+		length: { value: 0.2, min: 0, max: 2, step: 0.01 },
+		radius: { value: 0.02, min: 0, max: 0.05, step: 0.001 },
 	},
 	leaf: {
-		size: { value: 0.3, min: 0, max: 1, step: 0.01 },
+		size: { value: 0.1, min: 0, max: 1, step: 0.01 },
 	},
 	seed: { value: 0, min: 0, max: 9999, step: 1 }
 };
 
-const _ = ( folder: FolderApi, o: any ) => {
+const local = localStorage.getItem( "plant" );
 
-	const keys = Object.keys( o );
+if ( local ) {
 
-	for ( let i = 0; i < keys.length; i ++ ) {
+	PlantParam = PlantParam;
+	PlantParam = JSON.parse( local );
 
-		const key = keys[ i ];
-		const prop = o[ key ];
-
-		if ( typeof prop == "object" ) {
-
-			if ( prop.value !== undefined ) {
-
-				if ( typeof prop.value == "number" ) {
-
-					folder.addBinding( prop, "value", { ...prop, label: key } );
-
-				}
-
-			} else {
-
-				_( folder.addFolder( { title: key } ), prop );
-
-			}
-
-			continue;
-
-		}
-
-	}
-
-};
+}
 
 const plantFolder = pane.addFolder( { title: "plant" } );
 
-_( plantFolder, PlantParam );
+paneRegister( plantFolder, PlantParam );
 
 let random = randomSeed( PlantParam.seed.value );
 
 export class Plant extends MXP.Entity {
+
+	private leaf: MXP.Entity | null = null;
 
 	constructor() {
 
@@ -69,10 +53,8 @@ export class Plant extends MXP.Entity {
 
 		const branch = ( i : number, direction: GLP.Vector, radius: number, length: number ): MXP.Entity => {
 
-			const b = new MXP.Entity();
-
+			const branchEntity = new MXP.Entity();
 			const curve = new MXP.Curve();
-
 			const points: MXP.CurvePoint[] = [];
 
 			points.push( {
@@ -89,11 +71,14 @@ export class Plant extends MXP.Entity {
 
 				const p = new GLP.Vector();
 				p.add( direction.clone().multiply( length * w ) );
-				const offsetY = ( Math.log2( w + 1 ) ) * PlantParam.branch.yOffset.value;
+				p.y += w * PlantParam.branch.up.value * length;
+
+				const offsetY = ( Math.log2( w + 1 ) - w ) * PlantParam.branch.curve.value;
+				p.y += offsetY * length;
 
 				points.push( {
-					x: p.x, y: p.y + offsetY, z: p.z,
-					weight: ( 1.0 - w * 0.8 )
+					x: p.x, y: p.y, z: p.z,
+					weight: 1.0 - w * 0.8
 				} );
 
 			}
@@ -101,8 +86,8 @@ export class Plant extends MXP.Entity {
 			curve.setPoints( points );
 
 			const geo = new MXP.CurveGeometry( curve, radius, 12, 8 );
-			b.addComponent( "geometry", geo );
-			b.addComponent( "material", new MXP.Material() );
+			branchEntity.addComponent( "geometry", geo );
+			branchEntity.addComponent( "material", new MXP.Material( { cullFace: false } ) );
 
 			const ni = i + 1;
 			const nl = length * PlantParam.branch.lengthMultiplier.value;
@@ -122,39 +107,54 @@ export class Plant extends MXP.Entity {
 					nd.z += Math.cos( theta );
 
 					const child = branch( ni, nd, radius * point.weight, nl );
-					child.position.copy( point.position );
+					child.position.add( point.position );
 
-					b.add( child );
+					branchEntity.add( child );
 
 				}
 
 			}
 
-			if ( i > - 1 ) {
+			// leafe
 
-				const frame = curve.getFrenetFrames( 5 );
+			if ( i > - 1 && this.leaf ) {
 
 				const point = curve.getPoint( 1 );
 
-				const child = new MXP.Entity();
+				const leafEntity = new MXP.Entity();
 				const size = PlantParam.leaf.size.value;
 
-				child.addComponent( "geometry", new MXP.PlaneGeometry( size, size ) );
-				child.addComponent( "material", new MXP.Material( { cullFace: false } ) );
-				child.position.copy( point.position );
+				leafEntity.addComponent( "geometry", new MXP.PlaneGeometry( size, size ) );
+				// leafEntity.addComponent( "material", new MXP.Material() );
+				if ( window.add !== true ) {
 
-				child.quaternion.multiply( new GLP.Quaternion().setFromMatrix( frame.matrices[ 4 ] ) );
+					const mat = leafEntity.addComponent<MXP.Material>( "material", this.leaf.getComponent( "material" )! );
+					mat.cullFace = false;
 
-				b.add( child );
+				} else {
+
+					leafEntity.addComponent( "material", new MXP.Material() );
+
+				}
+
+				window.add = true;
+
+
+				leafEntity.position.copy( point.position );
+				leafEntity.quaternion.multiply( new GLP.Quaternion().setFromMatrix( point.matrix ) );
+
+				const pos = new GLP.Vector( 0, 0.0, - 0.005 );
+				pos.applyMatrix3( point.matrix );
+
+				leafEntity.position.add( pos );
+
+				branchEntity.add( leafEntity );
 
 			}
 
-
-			return b;
-
+			return branchEntity;
 
 		};
-
 
 		let plant: MXP.Entity | null = null;
 
@@ -168,10 +168,15 @@ export class Plant extends MXP.Entity {
 
 			}
 
-			const radius = PlantParam.branch.radius.value;
-			const length = PlantParam.branch.length.value;
+			plant = new MXP.Entity();
 
-			plant = branch( 0, new GLP.Vector( 0.3, 1.0, 0.0 ), radius, length );
+			for ( let i = 0; i < PlantParam.root.num.value; i ++ ) {
+
+				const dir = new GLP.Vector( ( random() - 0.5 ) * PlantParam.root.wide.value, 1.0, ( random() - 0.5 ) * PlantParam.root.wide.value ).normalize();
+
+				plant.add( branch( 0, dir, PlantParam.shape.radius.value, PlantParam.shape.length.value ) );
+
+			}
 
 			this.add( plant );
 
@@ -181,11 +186,27 @@ export class Plant extends MXP.Entity {
 
 			create();
 
-		} );
+			localStorage.setItem( "plant", JSON.stringify( PlantParam ) );
 
+		} );
 
 		create();
 
+		// assets
+
+		const loader = new MXP.GLTFLoader();
+
+		loader.load( "/scene.glb" ).then( gltf => {
+
+			const leaf = gltf.getEntityByName( "Leaf" );
+
+			this.leaf = leaf!;
+
+			this.add( this.leaf );
+
+			create();
+
+		} );
 
 	}
 

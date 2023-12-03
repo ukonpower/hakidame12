@@ -50,6 +50,7 @@ export interface GLTFMaterialElement {
     pbrMetallicRoughness?: GLTFPbrMetallicRoughness;
     emissiveTexture?: GLTFMaterialTexture;
     emissiveFactor?: number[],
+    normalTexture?: GLTFMaterialTexture;
     extensions?: GLTFMaterialExtensions;
 }
 

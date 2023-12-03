@@ -26,7 +26,7 @@ void main( void ) {
 	outColor += vec4( texture( backbuffer0, vUv ).xyz, 1.0 );
 	
 	vec3 dir = normalize( cameraPosition - gCol0.xyz );
-	float f = fresnel( dot( dir, gCol1.xyz ) );
+	float f = fresnel( clamp( dot( dir, gCol1.xyz ), 0.0, 1.0 ) );
 
 	vec4 ssrCol = texture( uSSRTexture, vUv );
 

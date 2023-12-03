@@ -99,9 +99,26 @@ export class Curve extends GLP.EventEmitter {
 
 		const { position, weight } = this.getPosition( t );
 
+		const d = 0.001;
+
+		const p1 = this.getPosition( Math.min( 1.0, t + d ) );
+		const p2 = this.getPosition( Math.max( 0.0, t - d ) );
+
+		const tangent = new GLP.Vector().copy( p1.position ).sub( p2.position ).normalize();
+		const bitangent = tangent.clone().cross( { x: 0.0, y: 1.0, z: 0.0 } ).normalize();
+		const normal = tangent.clone().cross( bitangent ).normalize();
+
+		const matrix = new GLP.Matrix( [
+			tangent.x, tangent.y, tangent.z, 0,
+			bitangent.x, bitangent.y, bitangent.z, 0,
+			normal.x, normal.y, normal.z, 0,
+			0, 0, 0, 1.0
+		] );
+
 		return {
 			position,
-			weight
+			weight,
+			matrix
 		};
 
 	}
@@ -176,28 +193,23 @@ export class Curve extends GLP.EventEmitter {
 
 				bitangents[ i ].normalize();
 
-				const v = new GLP.Vector().copy( tangents[ i ] ).dot( tangents[ i + 1 ] );
+				let v = new GLP.Vector().copy( tangents[ i ] ).dot( tangents[ i + 1 ] );
+				v = Math.min( 1.0, Math.max( - 1.0, v ) );
 				const theta = Math.min( 1.0, Math.max( - 1.0, Math.acos( v ) ) );
 
 				normals[ i + 1 ] = normals[ i ].clone().applyMatrix3( new GLP.Matrix().makeRotationAxis( bitangents[ i ], - theta ) );
+
 
 			}
 
 			bitangents[ i ].copy( tangents[ i ] ).cross( normals[ i ] ).normalize();
 
 			matrices[ i ] = new GLP.Matrix( [
-				normals[ i ].x, normals[ i ].y, normals[ i ].z, 0,
 				tangents[ i ].x, tangents[ i ].y, tangents[ i ].z, 0,
 				bitangents[ i ].x, bitangents[ i ].y, bitangents[ i ].z, 0,
+				normals[ i ].x, normals[ i ].y, normals[ i ].z, 0,
 				0, 0, 0, 1.0
 			] );
-
-			// matrices[ i ] = new GLP.Matrix( [
-			// 	tangents[ i ].x, bitangents[ i ].y, normals[ i ].z, 0.0,
-			// 	tangents[ i ].x, bitangents[ i ].y, normals[ i ].z, 0.0,
-			// 	tangents[ i ].x, bitangents[ i ].y, normals[ i ].z, 0.0,
-			// 	0, 0, 0, 1.0
-			// ] );
 
 		}
 

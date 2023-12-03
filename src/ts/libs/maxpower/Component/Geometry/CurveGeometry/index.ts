@@ -37,7 +37,6 @@ export class CurveGeometry extends Geometry {
 					// normal
 
 					const vec = new GLP.Vector();
-
 					vec.x = ( cos * N.x + sin * B.x );
 					vec.y = ( cos * N.y + sin * B.y );
 					vec.z = ( cos * N.z + sin * B.z );
@@ -52,11 +51,12 @@ export class CurveGeometry extends Geometry {
 
 					posArray.push( vec.x, vec.y, vec.z );
 
+
+
 					uvArray.push(
 						j / radSegments,
 						i / curveSegments
 					);
-
 
 					if ( i < curveSegments ) {
 

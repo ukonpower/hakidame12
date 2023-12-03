@@ -81,7 +81,7 @@ export class DeferredPostProcess extends MXP.PostProcess {
 					type: '1i'
 				},
 			} ),
-			resolutionRatio: 1.0,
+			resolutionRatio: 0.5,
 			passThrough: true,
 		} );
 

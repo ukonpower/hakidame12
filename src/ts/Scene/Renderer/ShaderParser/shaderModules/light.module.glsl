@@ -21,7 +21,7 @@ LightCamera lightCamera;
 
 		// shadow
 
-		shadow = getShadowSmooth( tex0.xyz, directionalLightCamera[ LOOP_INDEX ], directionalLightShadowMap[ LOOP_INDEX ], ( 1.0 - dot( light.direction, geo.normal ) ) * 0.0075 );
+		shadow = getShadowSmooth( tex0.xyz, directionalLightCamera[ LOOP_INDEX ], directionalLightShadowMap[ LOOP_INDEX ], ( 1.0 - dot( light.direction, geo.normal ) ) * 0.002 );
 		
 		// lighting
 

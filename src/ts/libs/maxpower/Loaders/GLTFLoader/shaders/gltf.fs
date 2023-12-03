@@ -27,6 +27,19 @@
 
 #endif
 
+#ifdef USE_NORMAL_MAP
+
+	uniform sampler2D uNormalMap;
+
+#endif
+
+#ifdef USE_TANGENT
+
+	in vec3 vTangent;
+	in vec3 vBitangent;
+
+#endif
+
 #ifdef USE_MR_MAP
 
 	uniform sampler2D uMRMap;
@@ -71,6 +84,8 @@ void main( void ) {
 
 	#endif
 
+	if( outColor.w < 0.5 ) discard;
+
 	outMetalic = 1.0;
 
 	#ifdef USE_MR_MAP
@@ -84,6 +99,26 @@ void main( void ) {
 	#ifdef USE_ROUGHNESS
 
 		outRoughness = uRoughness;
+
+	#endif
+
+	#ifdef USE_NORMAL_MAP
+
+		vec3 tangent = normalize( vTangent );
+		vec3 bitangent = normalize( vBitangent );
+
+		#ifdef DOUBLE_SIDED
+
+			tangent *= faceDirection;
+			bitangent *= faceDirection;
+		
+		#endif
+		
+		mat3 vTBN = mat3( tangent, bitangent, vNormal );
+		
+		vec3 mapN = texture( uNormalMap, mapUv ).xyz;
+		mapN = mapN * 2.0 - 1.0;
+		outNormal = normalize( vTBN * mapN );
 
 	#endif
 

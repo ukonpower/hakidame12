@@ -4,8 +4,10 @@ import { GLTF, GLTFBufferView, GLTFNode } from './gltf';
 import { Entity } from '../../Entity';
 import { Material } from '../../Component/Material';
 
-import gltfFrag from './shaders/gltf.fs';
 import { gl } from '~/ts/Globals';
+
+import gltfFrag from './shaders/gltf.fs';
+import gltfVert from './shaders/gltf.vs';
 
 const GLB_HEADER_LENGTH = 12;
 const GLB_CHUNK_HEADER_LENGTH = 8;
@@ -233,9 +235,29 @@ export class GLTFLoader extends GLP.EventEmitter {
 
 			const material = new Material( {
 				frag: gltfFrag,
+				vert: gltfVert,
 			} );
 
-			console.log( mat );
+			// normal
+
+			if ( mat.normalTexture ) {
+
+				const tex = getTexture( mat.normalTexture.index );
+
+				if ( tex ) {
+
+					material.uniforms.uNormalMap = {
+						value: tex,
+						type: "1i"
+					};
+
+					material.defines[ "USE_NORMAL_MAP" ] = "";
+
+				}
+
+			}
+
+			// pbr
 
 			if ( mat.pbrMetallicRoughness ) {
 
@@ -420,6 +442,12 @@ export class GLTFLoader extends GLP.EventEmitter {
 				if ( ! material ) {
 
 					material = new Material();
+
+				}
+
+				if ( geometry.attributes.has( "tangent" ) ) {
+
+					material.defines[ "USE_TANGENT" ] = "";
 
 				}
 

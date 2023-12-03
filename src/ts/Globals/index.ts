@@ -57,23 +57,3 @@ export const gpuState: GPUState | undefined = undefined;
 import 'webgl-memory';
 // gpuState = new GPUState();
 
-
-
-
-/*-------------------------------
-	Pane
--------------------------------*/
-
-export const pane = new Pane();
-
-pane.hidden = true;
-
-window.addEventListener( 'keydown', ( e ) => {
-
-	if ( e.key == "p" ) {
-
-		pane.hidden = ! pane.hidden;
-
-	}
-
-} );
