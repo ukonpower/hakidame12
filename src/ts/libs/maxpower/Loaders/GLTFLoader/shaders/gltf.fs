@@ -102,7 +102,8 @@ void main( void ) {
 
 	#endif
 
-	#ifdef USE_NORMAL_MAP
+	#ifdef USE_NORMAL_MAP 
+		#ifdef USE_TANGENT
 
 		vec3 tangent = normalize( vTangent );
 		vec3 bitangent = normalize( vBitangent );
@@ -120,6 +121,8 @@ void main( void ) {
 		mapN = mapN * 2.0 - 1.0;
 		outNormal = normalize( vTBN * mapN );
 
+		#endif
+		
 	#endif
 
 	#ifdef USE_METALNESS

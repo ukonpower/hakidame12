@@ -119,7 +119,6 @@ export class Scene extends GLP.EventEmitter {
 
 			this.frameDebugger = frameDebugger;
 
-
 		}
 
 	}

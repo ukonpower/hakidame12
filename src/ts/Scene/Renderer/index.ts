@@ -818,7 +818,7 @@ export class Renderer extends MXP.Entity {
 
 				}
 
-				// quer ------------------------
+				// query ------------------------
 
 				if ( process.env.NODE_ENV == 'development' && gpuState ) {
 

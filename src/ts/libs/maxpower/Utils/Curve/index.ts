@@ -105,7 +105,7 @@ export class Curve extends GLP.EventEmitter {
 		const p2 = this.getPosition( Math.max( 0.0, t - d ) );
 
 		const tangent = new GLP.Vector().copy( p1.position ).sub( p2.position ).normalize();
-		const bitangent = tangent.clone().cross( { x: 0.0, y: 1.0, z: 0.0 } ).normalize();
+		const bitangent = tangent.clone().cross( { x: 0.0, y: - 1.0, z: 0.0 } ).normalize();
 		const normal = tangent.clone().cross( bitangent ).normalize();
 
 		const matrix = new GLP.Matrix( [
