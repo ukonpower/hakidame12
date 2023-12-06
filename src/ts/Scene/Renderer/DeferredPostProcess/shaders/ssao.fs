@@ -28,7 +28,7 @@ in vec2 vUv;
 
 layout (location = 0) out vec4 outColor;
 
-#define SAMPLE 32
+#define SAMPLE 16
 
 void main( void ) {
 

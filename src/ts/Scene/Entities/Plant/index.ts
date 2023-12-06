@@ -128,6 +128,10 @@ export class Plant extends MXP.Entity {
 				const mat = leafEntity.addComponent<MXP.Material>( "material", this.leaf.getComponent( "material" )! );
 				mat.cullFace = false;
 
+				leafEntity.addComponent( "geometry", new MXP.PlaneGeometry( size, size ) );
+				leafEntity.addComponent<MXP.Material>( "material", new MXP.Material() );
+
+
 				leafEntity.position.copy( point.position );
 				leafEntity.quaternion.multiply( new GLP.Quaternion().setFromMatrix( point.matrix ).multiply( new GLP.Quaternion().setFromEuler( new GLP.Euler( 0.0, 0.0, - Math.PI / 2 ) ) ) );
 

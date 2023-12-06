@@ -34,6 +34,18 @@ in vec2 vUv;
 layout (location = 0) out vec4 glFragOut0;
 layout (location = 1) out vec4 glFragOut1;
 
+#define SSAOSAMPLE 8
+
+float gauss(float x, float x0, float sx){
+    
+    float arg = x-x0;
+    arg = -1./2.*arg*arg/sx;
+    
+    float a = 1./(sqrt(2.*3.1415*sx));
+    
+    return a*exp(arg);
+}
+
 void main( void ) {
 
 	//[
@@ -45,31 +57,28 @@ void main( void ) {
 
 	float occlusion = 0.0;
 
-	vec2 offset = vec2( uSSAOResolutionInv ) * 2.0;	
+	vec2 offset = vec2( uSSAOResolutionInv ) * 0.0;	
 
-	occlusion += texture( uSSAOTexture, vUv + vec2( -offset.x, offset.y ) ).x;
-	occlusion += texture( uSSAOTexture, vUv + vec2( 0.0, offset.y ) ).x;
-	occlusion += texture( uSSAOTexture, vUv + vec2( offset.x, offset.y ) ).x;
-	occlusion += texture( uSSAOTexture, vUv + vec2( -offset.x, 0.0 ) ).x;
-	occlusion += texture( uSSAOTexture, vUv + vec2( 0.0, 0.0 ) ).x;
-	occlusion += texture( uSSAOTexture, vUv + vec2( offset.x, 0.0 ) ).x;
-	occlusion += texture( uSSAOTexture, vUv + vec2( -offset.x, -offset.y ) ).x;
-	occlusion += texture( uSSAOTexture, vUv + vec2( 0.0, -offset.y ) ).x;
-	occlusion += texture( uSSAOTexture, vUv + vec2( offset.x, -offset.y ) ).x;
-	
-	offset = vec2( uSSAOResolutionInv ) * 4.0;	
+	for(int i = 0; i < SSAOSAMPLE; i++){
+		
+		for(int j = 0; j < SSAOSAMPLE; j++){
 
-	occlusion += texture( uSSAOTexture, vUv + vec2( -offset.x, offset.y ) ).x;
-	occlusion += texture( uSSAOTexture, vUv + vec2( 0.0, offset.y ) ).x;
-	occlusion += texture( uSSAOTexture, vUv + vec2( offset.x, offset.y ) ).x;
-	occlusion += texture( uSSAOTexture, vUv + vec2( -offset.x, 0.0 ) ).x;
-	occlusion += texture( uSSAOTexture, vUv + vec2( 0.0, 0.0 ) ).x;
-	occlusion += texture( uSSAOTexture, vUv + vec2( offset.x, 0.0 ) ).x;
-	occlusion += texture( uSSAOTexture, vUv + vec2( -offset.x, -offset.y ) ).x;
-	occlusion += texture( uSSAOTexture, vUv + vec2( 0.0, -offset.y ) ).x;
-	occlusion += texture( uSSAOTexture, vUv + vec2( offset.x, -offset.y ) ).x;
+			vec2 offset = vec2( float( i ), float(j) );
+			offset -= float( SSAOSAMPLE ) / 2.0;
+			offset *= uSSAOResolutionInv;
 
-	occlusion /= 18.0;
+			float xw = float( i ) / float( SSAOSAMPLE );
+			float yw = float( j ) / float( SSAOSAMPLE );
+
+			float gx = gauss()
+
+			occlusion += texture( uSSAOTexture, vUv + offset ).x;
+
+		}
+		
+	}
+
+	occlusion /= float( SSAOSAMPLE ) * float( SSAOSAMPLE );
 
 	// occlusion *= 0.8;
 	
