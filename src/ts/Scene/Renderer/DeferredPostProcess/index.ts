@@ -7,6 +7,7 @@ import { gl, power, globalUniforms } from '~/ts/Globals';
 
 import lightShaftFrag from './shaders/lightShaft.fs';
 import ssaoFrag from './shaders/ssao.fs';
+import ssaoBlurFrag from './shaders/ssaoBlur.fs';
 import deferredShadingFrag from './shaders/deferredShading.fs';
 
 export class DeferredPostProcess extends MXP.PostProcess {
@@ -22,6 +23,8 @@ export class DeferredPostProcess extends MXP.PostProcess {
 	private ssao: MXP.PostProcessPass;
 	public rtSSAO1: GLP.GLPowerFrameBuffer;
 	public rtSSAO2: GLP.GLPowerFrameBuffer;
+
+	private ssaoBlur: MXP.PostProcessPass;
 
 	// shading
 
@@ -81,7 +84,7 @@ export class DeferredPostProcess extends MXP.PostProcess {
 					type: '1i'
 				},
 			} ),
-			resolutionRatio: 0.5,
+			resolutionRatio: 1.0,
 			passThrough: true,
 		} );
 
@@ -101,6 +104,43 @@ export class DeferredPostProcess extends MXP.PostProcess {
 
 		}
 
+		const ssaoBlur = new MXP.PostProcessPass( {
+			name: 'ssaoBlur',
+			frag: MXP.hotGet( "ssaoBlur", ssaoBlurFrag ),
+			uniforms: GLP.UniformsUtils.merge( globalUniforms.time, {
+				uSSAOTexture: {
+					value: rtSSAO2.textures[ 0 ],
+					type: '1i'
+				},
+				uDepthTexture: {
+					value: null,
+					type: '1i'
+				},
+				uNormalTexture: {
+					value: null,
+					type: '1i'
+				},
+			} ),
+			resolutionRatio: 1.0,
+			passThrough: true,
+		} );
+
+		if ( import.meta.hot ) {
+
+			import.meta.hot.accept( "./shaders/ssaoBlur.fs", ( module ) => {
+
+				if ( module ) {
+
+					ssaoBlur.frag = MXP.hotUpdate( 'ssaoBlur', module.default );
+
+				}
+
+				ssaoBlur.requestUpdate();
+
+			} );
+
+		}
+
 		// shading
 
 		const shading = new MXP.PostProcessPass( {
@@ -112,7 +152,7 @@ export class DeferredPostProcess extends MXP.PostProcess {
 					type: '1i'
 				},
 				uSSAOTexture: {
-					value: null,
+					value: ssaoBlur.renderTarget!.textures[ 0 ],
 					type: '1i'
 				},
 				uSSAOResolutionInv: {
@@ -125,6 +165,7 @@ export class DeferredPostProcess extends MXP.PostProcess {
 		super( { passes: [
 			lightShaft,
 			ssao,
+			ssaoBlur,
 			shading,
 		] } );
 
@@ -134,6 +175,8 @@ export class DeferredPostProcess extends MXP.PostProcess {
 
 		this.rtSSAO1 = rtSSAO1;
 		this.rtSSAO2 = rtSSAO2;
+
+		this.ssaoBlur = ssaoBlur;
 
 		this.rtLightShaft1 = rtLightShaft1;
 		this.rtLightShaft2 = rtLightShaft2;
@@ -175,7 +218,7 @@ export class DeferredPostProcess extends MXP.PostProcess {
 		this.rtSSAO2 = tmp;
 
 		this.ssao.setRendertarget( this.rtSSAO1 );
-		this.shading.uniforms.uSSAOTexture.value = this.rtSSAO1.textures[ 0 ];
+		this.ssaoBlur.uniforms.uSSAOTexture.value = this.rtSSAO1.textures[ 0 ];
 		this.ssao.uniforms.uSSAOBackBuffer.value = this.rtSSAO2.textures[ 0 ];
 
 	}
@@ -192,6 +235,9 @@ export class DeferredPostProcess extends MXP.PostProcess {
 			};
 
 		}
+
+		this.ssaoBlur.uniforms.uDepthTexture.value = renderTarget.gBuffer.textures[ 0 ];
+		this.ssaoBlur.uniforms.uNormalTexture.value = renderTarget.gBuffer.textures[ 1 ];
 
 		this.lightShaft.uniforms.uDepthTexture.value = renderTarget.gBuffer.depthTexture;
 		this.ssao.uniforms.uDepthTexture.value = renderTarget.gBuffer.depthTexture;

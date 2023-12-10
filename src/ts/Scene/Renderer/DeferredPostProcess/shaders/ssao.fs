@@ -46,19 +46,19 @@ void main( void ) {
 	vec3 normal = texture( sampler1, vUv ).xyz;
 	float occlusion = 0.0;
 
-	float dist = 0.3;
-	float objectDepth =  0.5;
+	float dist = 0.6;
+	float objectDepth = 0.5;
 
 	for( int i = 0; i < SAMPLE; i ++ ) {
 
-		float seed = uFractTime + float( i );
+		float seed = uFractTime * 0.0 + float( i );
 		vec3 noise = vec3( random( vUv + seed * 1.234 ), random( vUv - seed * 2.456 ), random( vUv + seed ) * 0.95 + 0.05 );
 	
 		float r = sqrt( noise.x );
 		float theta = TPI * noise.y;
 		vec3 tDir = vec3( r * cos( theta ), r * sin( theta ), sqrt( 1.0 - noise.x ) );
 
-		tDir.y += 0.2;
+		tDir.y += 0.1;
 		tDir = normalize( tDir );
 
 		vec3 tangent = normalize( cross( normal, abs( normal.x ) > 0.001 ? vec3( 0.0, 1.0, 0.0 ) : vec3( 1.0, 0.0, 0.0 ) ) );
@@ -85,6 +85,8 @@ void main( void ) {
 	}
 
 	occlusion /= float( SAMPLE );
-	outColor = vec4( mix( texture( uSSAOBackBuffer, vUv ).xyz, vec3( occlusion ), 0.5 ), 1.0 );
+
+
+	outColor = vec4( mix( texture( uSSAOBackBuffer, vUv ).xyz, vec3( occlusion ), 0.6 ), 1.0 );
 
 }

@@ -12,7 +12,6 @@ uniform sampler2D sampler3; // emission, metalic
 uniform sampler2D sampler4; // velocity, env
 
 uniform sampler2D uSSAOTexture;
-uniform vec2 uSSAOResolutionInv;
 
 uniform sampler2D uLightShaftTexture;
 
@@ -34,18 +33,6 @@ in vec2 vUv;
 layout (location = 0) out vec4 glFragOut0;
 layout (location = 1) out vec4 glFragOut1;
 
-#define SSAOSAMPLE 16
-
-float gauss(float x, float x0, float sx){
-    
-    float arg = x-x0;
-    arg = -1./2.*arg*arg/sx;
-    
-    float a = 1./(sqrt(2.*3.1415*sx));
-    
-    return a*exp(arg);
-}
-
 void main( void ) {
 
 	//[
@@ -55,49 +42,7 @@ void main( void ) {
 	vec4 tex3 = texture( sampler3, vUv );
 	vec4 tex4 = texture( sampler4, vUv );
 
-	float occlusion = 0.0;
-
-	vec2 offset = vec2( uSSAOResolutionInv ) * 0.0;	
-	float weight = 0.0;
-
-	for(int i = 0; i < SSAOSAMPLE; i++){
-		
-		for(int j = 0; j < SSAOSAMPLE; j++){
-
-			vec2 offset = vec2( float( i ), float(j) );
-			offset /= float( SSAOSAMPLE );
-			offset -= 0.5;
-			offset *= uSSAOResolutionInv * 32.0;
-
-			// offset /= float( SSAOSAMPLE );
-			// offset -= 0.5;
-			// offset -= float( SSAOSAMPLE ) * 0.5;
-			// offset *= uSSAOResolutionInv;
-
-			float xw = float( i ) / float( SSAOSAMPLE ) - 0.5;
-			float yw = float( j ) / float( SSAOSAMPLE ) - 0.5;
-
-			float bilaterarlWeight = ();
-
-			float gx = gauss( xw, 0.0, 0.02 );
-			float gy = gauss( yw, 0.0, 0.02 );
-
-			// gx = 1.0;
-
-			occlusion += texture( uSSAOTexture, vUv + offset ).x * gx * gy;
-
-			weight += gx * gy;
-
-		}
-		
-	}
-
-	occlusion /= weight;
-
-	// glFragOut1 = glFragOut0 = vec4( vec3(occlusion * 10.0), 1.0 );
-	// return;
-
-	// occlusion *= 0.8;
+	float occlusion = texture( uSSAOTexture, vUv ).x;
 	
 	Geometry geo = Geometry(
 		tex0.xyz,
