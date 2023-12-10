@@ -19,6 +19,7 @@ import motionBlurNeighborFrag from './shaders/motionBlurNeighbor.fs';
 import motionBlurFrag from './shaders/motionBlur.fs';
 import ssCompositeFrag from './shaders/ssComposite.fs';
 import compositeFrag from './shaders/composite.fs';
+import { RotateViewer } from '../../Components/RotateViewer';
 
 export class MainCamera extends MXP.Entity {
 
@@ -107,7 +108,7 @@ export class MainCamera extends MXP.Entity {
 		const lookAt = this.addComponent( 'lookAt', new LookAt() );
 		// this.addComponent( "controls", new OrbitControls( window.document.body ) );
 		this.addComponent( 'shakeViewer', new ShakeViewer( 0.1, 1.0 ) );
-		// this.addComponent( "rotate", new RotateViewer( 5 ) );
+		this.addComponent( "rotate", new RotateViewer( 2 ) );
 
 		// resolution
 

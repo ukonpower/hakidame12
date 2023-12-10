@@ -34,7 +34,7 @@ in vec2 vUv;
 layout (location = 0) out vec4 glFragOut0;
 layout (location = 1) out vec4 glFragOut1;
 
-#define SSAOSAMPLE 8
+#define SSAOSAMPLE 16
 
 float gauss(float x, float x0, float sx){
     
@@ -58,27 +58,44 @@ void main( void ) {
 	float occlusion = 0.0;
 
 	vec2 offset = vec2( uSSAOResolutionInv ) * 0.0;	
+	float weight = 0.0;
 
 	for(int i = 0; i < SSAOSAMPLE; i++){
 		
 		for(int j = 0; j < SSAOSAMPLE; j++){
 
 			vec2 offset = vec2( float( i ), float(j) );
-			offset -= float( SSAOSAMPLE ) / 2.0;
-			offset *= uSSAOResolutionInv;
+			offset /= float( SSAOSAMPLE );
+			offset -= 0.5;
+			offset *= uSSAOResolutionInv * 32.0;
 
-			float xw = float( i ) / float( SSAOSAMPLE );
-			float yw = float( j ) / float( SSAOSAMPLE );
+			// offset /= float( SSAOSAMPLE );
+			// offset -= 0.5;
+			// offset -= float( SSAOSAMPLE ) * 0.5;
+			// offset *= uSSAOResolutionInv;
 
-			float gx = gauss()
+			float xw = float( i ) / float( SSAOSAMPLE ) - 0.5;
+			float yw = float( j ) / float( SSAOSAMPLE ) - 0.5;
 
-			occlusion += texture( uSSAOTexture, vUv + offset ).x;
+			float bilaterarlWeight = ();
+
+			float gx = gauss( xw, 0.0, 0.02 );
+			float gy = gauss( yw, 0.0, 0.02 );
+
+			// gx = 1.0;
+
+			occlusion += texture( uSSAOTexture, vUv + offset ).x * gx * gy;
+
+			weight += gx * gy;
 
 		}
 		
 	}
 
-	occlusion /= float( SSAOSAMPLE ) * float( SSAOSAMPLE );
+	occlusion /= weight;
+
+	// glFragOut1 = glFragOut0 = vec4( vec3(occlusion * 10.0), 1.0 );
+	// return;
 
 	// occlusion *= 0.8;
 	

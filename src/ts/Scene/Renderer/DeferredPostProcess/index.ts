@@ -70,7 +70,7 @@ export class DeferredPostProcess extends MXP.PostProcess {
 		const ssao = new MXP.PostProcessPass( {
 			name: 'ssao',
 			frag: ssaoFrag,
-			renderTarget: rtSSAO1,
+			renderTarget: MXP.hotGet( "ssao", rtSSAO1 ),
 			uniforms: GLP.UniformsUtils.merge( globalUniforms.time, {
 				uSSAOBackBuffer: {
 					value: rtSSAO2.textures[ 0 ],
@@ -84,6 +84,22 @@ export class DeferredPostProcess extends MXP.PostProcess {
 			resolutionRatio: 0.5,
 			passThrough: true,
 		} );
+
+		if ( import.meta.hot ) {
+
+			import.meta.hot.accept( "./shaders/ssao.fs", ( module ) => {
+
+				if ( module ) {
+
+					ssao.frag = MXP.hotUpdate( 'ssao', module.default );
+
+				}
+
+				ssao.requestUpdate();
+
+			} );
+
+		}
 
 		// shading
 
