@@ -45,7 +45,7 @@ LightCamera lightCamera;
 
 		// shadow
 
-		shadow = getShadowSmooth( geo.position, spotLightCamera[ LOOP_INDEX ], spotLightShadowMap[ LOOP_INDEX ], 0.01 );
+		shadow = getShadowSmooth( geo.position, spotLightCamera[ LOOP_INDEX ], spotLightShadowMap[ LOOP_INDEX ], 0.001 );
 
 		// lighting
 

@@ -33,6 +33,25 @@ in vec2 vUv;
 layout (location = 0) out vec4 glFragOut0;
 layout (location = 1) out vec4 glFragOut1;
 
+// struct Geometry {
+// 	vec3 position;
+// 	vec3 normal;
+// 	float depth;
+// 	vec3 viewDir;
+// 	vec3 viewDirWorld;
+// 	float occulusion;
+// };
+
+// struct Material {
+// 	vec3 albedo;
+// 	float roughness;
+// 	float metalic;
+// 	vec3 emission;
+// 	float emissionIntensity;
+// 	vec3 diffuseColor;
+// 	vec3 specularColor;
+// };
+
 void main( void ) {
 
 	//[

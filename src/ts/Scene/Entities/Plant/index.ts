@@ -1,7 +1,11 @@
 import * as GLP from 'glpower';
 import * as MXP from 'maxpower';
+
 import { pane, paneRegister } from '~/ts/Globals/pane';
 import { randomSeed } from '~/ts/libs/Math';
+
+import leafFrag from './shaders/leaf.fs';
+import branchFrag from './shaders/branch.fs';
 
 let PlantParam = {
 	root: {
@@ -46,6 +50,7 @@ let random = randomSeed( PlantParam.seed.value );
 export class Plant extends MXP.Entity {
 
 	private leaf: MXP.Entity | null = null;
+	private root: MXP.Entity | null = null;
 
 	constructor() {
 
@@ -87,7 +92,7 @@ export class Plant extends MXP.Entity {
 
 			const geo = new MXP.CurveGeometry( curve, radius, 12, 8 );
 			branchEntity.addComponent( "geometry", geo );
-			branchEntity.addComponent( "material", new MXP.Material( { cullFace: false } ) );
+			branchEntity.addComponent( "material", new MXP.Material( { cullFace: false, frag: branchFrag } ) );
 
 			const ni = i + 1;
 			const nl = length * PlantParam.branch.lengthMultiplier.value;
@@ -126,15 +131,11 @@ export class Plant extends MXP.Entity {
 
 				leafEntity.addComponent( "geometry", this.leaf.getComponent( "geometry" )! );
 				const mat = leafEntity.addComponent<MXP.Material>( "material", this.leaf.getComponent( "material" )! );
+				mat.frag = leafFrag;
 				mat.cullFace = false;
-
-				leafEntity.addComponent( "geometry", new MXP.PlaneGeometry( size, size ) );
-				leafEntity.addComponent<MXP.Material>( "material", new MXP.Material() );
-
 
 				leafEntity.position.copy( point.position );
 				leafEntity.quaternion.multiply( new GLP.Quaternion().setFromMatrix( point.matrix ).multiply( new GLP.Quaternion().setFromEuler( new GLP.Euler( 0.0, 0.0, - Math.PI / 2 ) ) ) );
-
 
 				const pos = new GLP.Vector( 0, 0.0, 0.0 );
 				pos.applyMatrix3( point.matrix );
@@ -165,13 +166,19 @@ export class Plant extends MXP.Entity {
 
 			for ( let i = 0; i < PlantParam.root.num.value; i ++ ) {
 
-				const dir = new GLP.Vector( ( random() - 0.5 ) * PlantParam.root.wide.value, 1.0, ( random() - 0.5 ) * PlantParam.root.wide.value ).normalize();
+				// const dir = new GLP.Vector( ( random() - 0.5 ) * PlantParam.root.wide.value, 0.5 - ( PlantParam.root.wide.value ) * 0.4, ( random() - 0.5 ) * PlantParam.root.wide.value ).normalize();
 
-				plant.add( branch( 0, dir, PlantParam.shape.radius.value, PlantParam.shape.length.value ) );
+				const dir = new GLP.Vector( 0.0, 0.0, 1.0 );
+
+				const b = branch( 0, dir, PlantParam.shape.radius.value, PlantParam.shape.length.value );
+				b.quaternion.setFromEuler( new GLP.Euler( 0.0, i / PlantParam.root.num.value * Math.PI * 2.0, 0.0 ) );
+				plant.add( b );
 
 			}
 
 			this.add( plant );
+
+			this.root = plant;
 
 		};
 
@@ -198,6 +205,18 @@ export class Plant extends MXP.Entity {
 			create();
 
 		} );
+
+	}
+
+	protected updateImpl( event: MXP.EntityUpdateEvent ): void {
+
+		this.root?.children.forEach( ( item, i ) => {
+
+			const wind = ( Math.sin( event.time * 1.0 ) * 0.5 + 0.5 ) * ( Math.sin( event.time * 1.4 ) * 0.5 + 0.5 );
+			item.quaternion.multiply( new GLP.Quaternion().setFromEuler( new GLP.Euler( Math.sin( event.time * 8.0 + i ) * wind * 0.006, 0.0, 0.0 ) ) );
+
+		} );
+
 
 	}
 

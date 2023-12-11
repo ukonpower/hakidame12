@@ -109,7 +109,7 @@ export class MainCamera extends MXP.Entity {
 		const lookAt = this.addComponent( 'lookAt', new LookAt() );
 		this.addComponent( "controls", new OrbitControls( window.document.body ) );
 		this.addComponent( 'shakeViewer', new ShakeViewer( 0.1, 1.0 ) );
-		// this.addComponent( "rotate", new RotateViewer( 2 ) );
+		this.addComponent( "rotate", new RotateViewer( 2 ) );
 
 		// resolution
 
@@ -493,9 +493,9 @@ export class MainCamera extends MXP.Entity {
 				this.colorCollection,
 				this.ssr,
 				this.ssComposite,
-				// this.dofCoc,
-				// this.dofBokeh,
-				// this.dofComposite,
+				this.dofCoc,
+				this.dofBokeh,
+				this.dofComposite,
 				// this.motionBlurTile,
 				// this.motionBlurNeighbor,
 				// this.motionBlur,
