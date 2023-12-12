@@ -78,7 +78,7 @@ export class Plant extends MXP.Entity {
 				p.add( direction.clone().multiply( length * w ) );
 				p.y += w * PlantParam.branch.up.value * length;
 
-				const offsetY = ( Math.log2( w + 1 ) - w ) * PlantParam.branch.curve.value;
+				const offsetY = ( Math.log2( w + 1 ) - w ) * PlantParam.branch.curve.value * 2.0;
 				p.y += offsetY * length;
 
 				points.push( {
@@ -106,10 +106,14 @@ export class Plant extends MXP.Entity {
 					const point = curve.getPoint( j / ( branches - 1 ) * ( PlantParam.branch.end.value - PlantParam.branch.start.value ) + PlantParam.branch.start.value );
 
 					const nd = direction.clone();
-					nd.y *= 0.0;
+					// nd.y *= 0.0;
 					const theta = random() * Math.PI * 2.0;
 					nd.x += Math.sin( theta );
 					nd.z += Math.cos( theta );
+					nd.normalize();
+
+					// console.log( nd );
+
 
 					const child = branch( ni, nd, radius * point.weight, nl );
 					child.position.add( point.position );
@@ -168,7 +172,7 @@ export class Plant extends MXP.Entity {
 
 				// const dir = new GLP.Vector( ( random() - 0.5 ) * PlantParam.root.wide.value, 0.5 - ( PlantParam.root.wide.value ) * 0.4, ( random() - 0.5 ) * PlantParam.root.wide.value ).normalize();
 
-				const dir = new GLP.Vector( 0.0, 0.0, 1.0 );
+				const dir = new GLP.Vector( 0.0, 1, 1.0 ).normalize();
 
 				const b = branch( 0, dir, PlantParam.shape.radius.value, PlantParam.shape.length.value );
 				b.quaternion.setFromEuler( new GLP.Euler( 0.0, i / PlantParam.root.num.value * Math.PI * 2.0, 0.0 ) );
