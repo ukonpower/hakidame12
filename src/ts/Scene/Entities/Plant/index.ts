@@ -39,7 +39,7 @@ const local = localStorage.getItem( "plant" );
 if ( local ) {
 
 	PlantParam = PlantParam;
-	// PlantParam = JSON.parse( local );
+	PlantParam = JSON.parse( local );
 
 }
 
