@@ -10,24 +10,26 @@ import branchFrag from './shaders/branch.fs';
 let PlantParam = {
 	root: {
 		num: { value: 2, min: 0, max: 10, step: 1 },
-		wide: { value: 0, min: 0.01, max: 2, step: 0.01 },
+		up: { value: 0.8, min: 0, max: 1, step: 0.01 }
 	},
 	branch: {
 		num: { value: 2, min: 0, max: 10, step: 1 },
-		depth: { value: 2, min: 0, max: 5, step: 1 },
-		start: { value: 0.1, min: 0, max: 1, step: 0.01 },
-		end: { value: 0.3, min: 0, max: 1, step: 0.01 },
-		wide: { value: 0.2, min: 0, max: 2, step: 0.01 },
-		up: { value: 1.0, min: 0, max: 2, step: 0.01 },
-		curve: { value: 0.24, min: - 2, max: 2, step: 0.01 },
-		lengthMultiplier: { value: 0.9, min: 0, max: 2, step: 0.01 },
+		depth: { value: 4, min: 0, max: 5, step: 1 },
+		start: { value: 0.3, min: 0, max: 1, step: 0.01 },
+		end: { value: 0.8, min: 0, max: 1, step: 0.01 },
+		up: { value: 0.3, min: - 1, max: 1, step: 0.01 },
+		wide: { value: 1.0, min: 0, max: 1, step: 0.01 },
+		curve: { value: 0.24, min: - 1, max: 1, step: 0.01 },
+		lengthMultiplier: { value: 0.6, min: 0, max: 2, step: 0.01 },
+		lengthRandom: { value: 0.5, min: 0, max: 1, step: 0.01 },
 	},
 	shape: {
-		length: { value: 0.2, min: 0, max: 2, step: 0.01 },
-		radius: { value: 0.02, min: 0, max: 0.05, step: 0.001 },
+		length: { value: 0.5, min: 0, max: 2, step: 0.01 },
+		radius: { value: 0.015, min: 0, max: 0.05, step: 0.001 },
 	},
 	leaf: {
-		size: { value: 0.1, min: 0, max: 1, step: 0.01 },
+		size: { value: 0.4, min: 0, max: 1, step: 0.01 },
+		dpeth: { value: 1, min: 0, max: 5, step: 1 },
 	},
 	seed: { value: 0, min: 0, max: 9999, step: 1 }
 };
@@ -37,7 +39,7 @@ const local = localStorage.getItem( "plant" );
 if ( local ) {
 
 	PlantParam = PlantParam;
-	PlantParam = JSON.parse( local );
+	// PlantParam = JSON.parse( local );
 
 }
 
@@ -59,6 +61,9 @@ export class Plant extends MXP.Entity {
 		const branch = ( i : number, direction: GLP.Vector, radius: number, length: number ): MXP.Entity => {
 
 			const branchEntity = new MXP.Entity();
+
+			// branch curve
+
 			const curve = new MXP.Curve();
 			const points: MXP.CurvePoint[] = [];
 
@@ -76,9 +81,8 @@ export class Plant extends MXP.Entity {
 
 				const p = new GLP.Vector();
 				p.add( direction.clone().multiply( length * w ) );
-				p.y += w * PlantParam.branch.up.value * length;
 
-				const offsetY = ( Math.log2( w + 1 ) - w ) * PlantParam.branch.curve.value * 2.0;
+				const offsetY = ( Math.log2( w + 1 ) - w ) * PlantParam.branch.curve.value * 4.0;
 				p.y += offsetY * length;
 
 				points.push( {
@@ -90,50 +94,24 @@ export class Plant extends MXP.Entity {
 
 			curve.setPoints( points );
 
+			// branch mesh
+
 			const geo = new MXP.CurveGeometry( curve, radius, 12, 8 );
 			branchEntity.addComponent( "geometry", geo );
 			branchEntity.addComponent( "material", new MXP.Material( { cullFace: false, frag: branchFrag } ) );
 
-			const ni = i + 1;
-			const nl = length * PlantParam.branch.lengthMultiplier.value;
+			// leaf
 
-			if ( ni < PlantParam.branch.depth.value ) {
-
-				const branches = PlantParam.branch.num.value;
-
-				for ( let j = 0; j < branches; j ++ ) {
-
-					const point = curve.getPoint( j / ( branches - 1 ) * ( PlantParam.branch.end.value - PlantParam.branch.start.value ) + PlantParam.branch.start.value );
-
-					const nd = direction.clone();
-					// nd.y *= 0.0;
-					const theta = random() * Math.PI * 2.0;
-					nd.x += Math.sin( theta );
-					nd.z += Math.cos( theta );
-					nd.normalize();
-
-					// console.log( nd );
-
-
-					const child = branch( ni, nd, radius * point.weight, nl );
-					child.position.add( point.position );
-
-					branchEntity.add( child );
-
-				}
-
-			}
-
-			// leafe
-
-			if ( i > - 1 && this.leaf ) {
+			if ( i >= PlantParam.leaf.dpeth.value && this.leaf ) {
 
 				const point = curve.getPoint( 1 );
 
 				const leafEntity = new MXP.Entity();
-				const size = PlantParam.leaf.size.value;
-
 				leafEntity.addComponent( "geometry", this.leaf.getComponent( "geometry" )! );
+
+				const size = PlantParam.leaf.size.value;
+				leafEntity.scale.set( size );
+
 				const mat = leafEntity.addComponent<MXP.Material>( "material", this.leaf.getComponent( "material" )! );
 				mat.frag = leafFrag;
 				mat.cullFace = false;
@@ -147,6 +125,38 @@ export class Plant extends MXP.Entity {
 				leafEntity.position.add( pos );
 
 				branchEntity.add( leafEntity );
+
+			}
+
+			// child branch
+
+			if ( i < PlantParam.branch.depth.value - 1 ) {
+
+				const branches = PlantParam.branch.num.value;
+
+				for ( let j = 0; j < branches; j ++ ) {
+
+					const pointPos = ( branches == 1 ? 0.5 : j / ( branches - 1 ) ) * ( PlantParam.branch.end.value - PlantParam.branch.start.value ) + PlantParam.branch.start.value;
+
+					const point = curve.getPoint( pointPos );
+
+					const nd = direction.clone();
+					nd.normalize();
+
+					const theta = ( random() - 0.5 ) * Math.PI * 2.0;
+					nd.x += Math.sin( theta ) * PlantParam.branch.wide.value;
+					nd.z += Math.cos( theta ) * PlantParam.branch.wide.value;
+					nd.normalize();
+
+					const dir = new GLP.Vector( 0.0, Math.sin( PlantParam.branch.up.value * Math.PI / 2.0 ), Math.cos( PlantParam.branch.up.value * Math.PI / 2.0 ) ).normalize();
+
+					const child = branch( i + 1, dir, radius * point.weight, length * PlantParam.branch.lengthMultiplier.value * ( 1.0 - random() * PlantParam.branch.lengthRandom.value ) );
+					child.quaternion.setFromEuler( new GLP.Euler( 0.0, Math.atan2( nd.x, nd.z ), 0.0 ) );
+
+					child.position.add( point.position );
+					branchEntity.add( child );
+
+				}
 
 			}
 
@@ -170,10 +180,7 @@ export class Plant extends MXP.Entity {
 
 			for ( let i = 0; i < PlantParam.root.num.value; i ++ ) {
 
-				// const dir = new GLP.Vector( ( random() - 0.5 ) * PlantParam.root.wide.value, 0.5 - ( PlantParam.root.wide.value ) * 0.4, ( random() - 0.5 ) * PlantParam.root.wide.value ).normalize();
-
-				const dir = new GLP.Vector( 0.0, 1, 1.0 ).normalize();
-
+				const dir = new GLP.Vector( 0.0, Math.sin( PlantParam.root.up.value * Math.PI / 2.0 ), Math.cos( PlantParam.root.up.value * Math.PI / 2.0 ) ).normalize();
 				const b = branch( 0, dir, PlantParam.shape.radius.value, PlantParam.shape.length.value );
 				b.quaternion.setFromEuler( new GLP.Euler( 0.0, i / PlantParam.root.num.value * Math.PI * 2.0, 0.0 ) );
 				plant.add( b );
@@ -186,6 +193,10 @@ export class Plant extends MXP.Entity {
 
 		};
 
+		create();
+
+		// onchange
+
 		plantFolder.on( "change", ( e ) =>{
 
 			create();
@@ -193,8 +204,6 @@ export class Plant extends MXP.Entity {
 			localStorage.setItem( "plant", JSON.stringify( PlantParam ) );
 
 		} );
-
-		create();
 
 		// assets
 
