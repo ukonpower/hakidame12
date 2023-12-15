@@ -3,7 +3,7 @@
 #include <packing>
 #include <frag_h>
 
-in float vMaterialId;
+flat in int vMaterialId;
 
 #ifdef USE_COLOR
 
@@ -71,92 +71,97 @@ void main( void ) {
 
 	#include <frag_in>
 
-	vec2 mapUv = vUv;
-	mapUv.y = 1.0 - mapUv.y;
+	if( vMaterialId == 1 ) {
 
-	#ifdef USE_COLOR
+		vec2 mapUv = vUv;
+		mapUv.y = 1.0 - mapUv.y;
 
-		outColor = uBaseColor;
+		#ifdef USE_COLOR
 
-	#endif
+			outColor = uBaseColor;
 
-	#ifdef USE_COLOR_MAP
-
-		outColor = texture( uBaseColorMap, mapUv );
-
-	#endif
-
-	if( outColor.w < 0.5 ) discard;
-
-	outMetalic = 1.0;
-
-	#ifdef USE_MR_MAP
-
-		vec4 mr = texture( uMRMap, mapUv );
-		outRoughness = mr.y;
-		outMetalic = mr.z;
-
-	#endif
-	
-	#ifdef USE_ROUGHNESS
-
-		outRoughness = uRoughness;
-
-	#endif
-
-	#ifdef USE_NORMAL_MAP 
-		#ifdef USE_TANGENT
-
-		vec3 tangent = normalize( vTangent );
-		vec3 bitangent = normalize( vBitangent );
-
-		#ifdef DOUBLE_SIDED
-
-			tangent *= faceDirection;
-			bitangent *= faceDirection;
-		
 		#endif
-		
-		mat3 vTBN = mat3( tangent, bitangent, vNormal );
-		
-		vec3 mapN = texture( uNormalMap, mapUv ).xyz;
-		mapN = mapN * 2.0 - 1.0;
-		outNormal = normalize( vTBN * mapN );
+
+		#ifdef USE_COLOR_MAP
+
+			outColor = texture( uBaseColorMap, mapUv );
+
+		#endif
+
+		if( outColor.w < 0.5 ) discard;
+
+		outMetalic = 1.0;
+
+		#ifdef USE_MR_MAP
+
+			vec4 mr = texture( uMRMap, mapUv );
+			outRoughness = mr.y;
+			outMetalic = mr.z;
 
 		#endif
 		
-	#endif
+		#ifdef USE_ROUGHNESS
 
-	#ifdef USE_METALNESS
+			outRoughness = uRoughness;
 
-		outMetalic = uMetalness;
+		#endif
 
-	#endif
+		#ifdef USE_NORMAL_MAP 
+		
+			#ifdef USE_TANGENT
 
-	#ifdef USE_EMISSION
+			vec3 tangent = normalize( vTangent );
+			vec3 bitangent = normalize( vBitangent );
 
-		outEmission = uEmission;
+			#ifdef DOUBLE_SIDED
 
-	#endif
+				tangent *= faceDirection;
+				bitangent *= faceDirection;
+			
+			#endif
+			
+			mat3 vTBN = mat3( tangent, bitangent, vNormal );
+			
+			vec3 mapN = texture( uNormalMap, mapUv ).xyz;
+			mapN = mapN * 2.0 - 1.0;
+			outNormal = normalize( vTBN * mapN );
 
-	#ifdef USE_EMISSION_MAP
+			#endif
+			
+		#endif
 
-		vec4 emission = texture( uEmissionMap, mapUv );
-		outEmission = emission.xyz;
+		#ifdef USE_METALNESS
 
-	#endif
+			outMetalic = uMetalness;
 
-	#ifdef USE_EMISSION_STRENGTH
+		#endif
 
-		outEmissionIntensity *= uEmissionStrength;
+		#ifdef USE_EMISSION
 
-	#endif
+			outEmission = uEmission;
 
-	outEmission += outColor.xyz * 0.6;
+		#endif
 
-	// outColor = vec4( vTangent, 1.0 );
-	// outEmission = outColor.xyz;
-	// return;
+		#ifdef USE_EMISSION_MAP
+
+			vec4 emission = texture( uEmissionMap, mapUv );
+			outEmission = emission.xyz;
+
+		#endif
+
+		#ifdef USE_EMISSION_STRENGTH
+
+			outEmissionIntensity *= uEmissionStrength;
+
+		#endif
+
+		outEmission += outColor.xyz * 0.6;
+
+	} else {
+
+		outColor = vec4( 0.8, 1.0, 0.3, 1.0 );
+		
+	}
 
 	#include <frag_out>
 

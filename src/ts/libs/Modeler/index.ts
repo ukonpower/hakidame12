@@ -5,7 +5,7 @@ import { setUniforms } from '~/ts/Scene/Renderer';
 import { shaderParse } from '~/ts/Scene/Renderer/ShaderParser';
 
 type BakeAttribute = {
-	[key: string]: number
+	[key: string]: {size: number, type: Float32ArrayConstructor | Uint16ArrayConstructor | Uint8ArrayConstructor}
 }
 
 export class Modeler {
@@ -167,7 +167,7 @@ export class Modeler {
 		const indexArray: number[] = [];
 
 		const customAttributes: BakeAttribute = {
-			uv: 2,
+			uv: { size: 2, type: Float32Array },
 			...attrs,
 		};
 
@@ -183,7 +183,7 @@ export class Modeler {
 
 				if ( mat ) {
 
-					// geo = this.bakeTf( geo, mat.vert, mat.uniforms, { ...mat.defines } );
+					geo = this.bakeTf( geo, mat.vert, mat.uniforms, { ...mat.defines } );
 
 				}
 
@@ -224,9 +224,12 @@ export class Modeler {
 
 					for ( let i = 0; i < tangent.array.length; i += 4 ) {
 
-						const p = new GLP.Vector( tangent.array[ i + 0 ], tangent.array[ i + 1 ], tangent.array[ i + 2 ], 0.0 );
-						p.applyMatrix4( matrix );
-						tangentArray.push( p.x, p.y, p.z, tangent.array[ i + 3 ] );
+						const w = tangent.array[ i + 3 ];
+						const t = new GLP.Vector( tangent.array[ i + 0 ] * w, tangent.array[ i + 1 ] * w, tangent.array[ i + 2 ] * w, 0 );
+						t.applyMatrix4( matrix );
+
+
+						tangentArray.push( t.x, t.y, t.z, 1 );
 
 					}
 
@@ -259,7 +262,7 @@ export class Modeler {
 				for ( let i = 0; i < customAttributeKeys.length; i ++ ) {
 
 					const attrName = customAttributeKeys[ i ];
-					const attrSize = customAttributes[ attrName ];
+					const attrInfo = customAttributes[ attrName ];
 					const attr = geo.getAttribute( attrName );
 
 					let attrArray = bakedAttributes[ attrName ];
@@ -272,10 +275,10 @@ export class Modeler {
 
 					if ( attr ) {
 
-						for ( let j = 0; j < attr.array.length; j += attrSize ) {
+						for ( let j = 0; j < attr.array.length; j += attrInfo.size ) {
 
 							const array = [ attr.array[ j + 0 ], attr.array[ j + 1 ], attr.array[ j + 2 ], attr.array[ j + 3 ] ];
-							attrArray.push( ...array.slice( 0, attrSize ) );
+							attrArray.push( ...array.slice( 0, attrInfo.size ) );
 
 						}
 
@@ -302,9 +305,9 @@ export class Modeler {
 		for ( let i = 0; i < attributeKeys.length; i ++ ) {
 
 			const attrName = attributeKeys[ i ];
-			const attrSize = customAttributes[ attrName ];
+			const attrInfo = customAttributes[ attrName ];
 
-			resultGeo.setAttribute( attrName, new Float32Array( bakedAttributes[ attrName ] ), attrSize );
+			resultGeo.setAttribute( attrName, new attrInfo.type( bakedAttributes[ attrName ] ), attrInfo.size );
 
 		}
 
