@@ -6,6 +6,11 @@ import { randomSeed } from '~/ts/libs/Math';
 
 import leafFrag from './shaders/leaf.fs';
 import branchFrag from './shaders/branch.fs';
+import plantFrag from './shaders/plant.fs';
+import plantVert from './shaders/plant.vs';
+
+import { Modeler } from '~/ts/libs/Modeler';
+import { power } from '~/ts/Globals';
 
 let PlantParam = {
 	root: {
@@ -97,8 +102,9 @@ export class Plant extends MXP.Entity {
 			// branch mesh
 
 			const geo = new MXP.CurveGeometry( curve, radius, 12, 8 );
+			geo.setAttribute( "materialId", new Uint8Array( new Array( geo.vertCount ).fill( 0 ) ), 1 );
 			branchEntity.addComponent( "geometry", geo );
-			branchEntity.addComponent( "material", new MXP.Material( { cullFace: false, frag: branchFrag } ) );
+			// branchEntity.addComponent( "material", new MXP.Material( { cullFace: false, frag: branchFrag } ) );
 
 			// leaf
 
@@ -107,14 +113,14 @@ export class Plant extends MXP.Entity {
 				const point = curve.getPoint( 1 );
 
 				const leafEntity = new MXP.Entity();
-				leafEntity.addComponent( "geometry", this.leaf.getComponent( "geometry" )! );
+
+				const geo = this.leaf.getComponent<MXP.Geometry>( "geometry" )!;
+				geo.setAttribute( "materialId", new Uint8Array( new Array( geo.vertCount ).fill( 1 ) ), 1 );
+
+				leafEntity.addComponent( "geometry", geo );
 
 				const size = PlantParam.leaf.size.value;
 				leafEntity.scale.set( size );
-
-				const mat = leafEntity.addComponent<MXP.Material>( "material", this.leaf.getComponent( "material" )! );
-				mat.frag = leafFrag;
-				mat.cullFace = false;
 
 				leafEntity.position.copy( point.position );
 				leafEntity.quaternion.multiply( new GLP.Quaternion().setFromMatrix( point.matrix ).multiply( new GLP.Quaternion().setFromEuler( new GLP.Euler( 0.0, 0.0, - Math.PI / 2 ) ) ) );
@@ -129,6 +135,8 @@ export class Plant extends MXP.Entity {
 			}
 
 			// child branch
+
+			const model = new MXP.Entity();
 
 			if ( i < PlantParam.branch.depth.value - 1 ) {
 
@@ -178,12 +186,24 @@ export class Plant extends MXP.Entity {
 
 			plant = new MXP.Entity();
 
+			const modeler = new Modeler( power );
+
 			for ( let i = 0; i < PlantParam.root.num.value; i ++ ) {
 
 				const dir = new GLP.Vector( 0.0, Math.sin( PlantParam.root.up.value * Math.PI / 2.0 ), Math.cos( PlantParam.root.up.value * Math.PI / 2.0 ) ).normalize();
 				const b = branch( 0, dir, PlantParam.shape.radius.value, PlantParam.shape.length.value );
-				b.quaternion.setFromEuler( new GLP.Euler( 0.0, i / PlantParam.root.num.value * Math.PI * 2.0, 0.0 ) );
-				plant.add( b );
+
+				const bModle = new MXP.Entity();
+				bModle.addComponent( "geometry", modeler.bakeEntity( b, { materialId: 1 } ) );
+				// bModle.addComponent( "material", new MXP.Material() );
+
+				const mat = bModle.addComponent( "material", this.leaf!.getComponent<MXP.Material>( "material" )! );
+				mat.frag = plantFrag;
+				mat.vert = plantVert;
+				mat.cullFace = false;
+
+				bModle.quaternion.setFromEuler( new GLP.Euler( 0.0, i / PlantParam.root.num.value * Math.PI * 2.0, 0.0 ) );
+				plant.add( bModle );
 
 			}
 
@@ -193,7 +213,7 @@ export class Plant extends MXP.Entity {
 
 		};
 
-		create();
+		// create();
 
 		// onchange
 

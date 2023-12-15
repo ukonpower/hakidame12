@@ -4,6 +4,10 @@ import * as MXP from 'maxpower';
 import { setUniforms } from '~/ts/Scene/Renderer';
 import { shaderParse } from '~/ts/Scene/Renderer/ShaderParser';
 
+type BakeAttribute = {
+	[key: string]: number
+}
+
 export class Modeler {
 
 	private power: GLP.Power;
@@ -152,17 +156,26 @@ export class Modeler {
 
 	}
 
-	public bakeEntity( entity: MXP.Entity ) {
+
+
+	public bakeEntity( entity: MXP.Entity, attrs?: BakeAttribute ) {
 
 		const resultGeo = new MXP.Geometry();
-
 		const posArray: number[] = [];
 		const normalArray : number[] = [];
+		const tangentArray : number[] = [];
 		const indexArray: number[] = [];
+
+		const customAttributes: BakeAttribute = {
+			uv: 2,
+			...attrs,
+		};
+
+		const bakedAttributes: {[key: string]: number[]} = {};
 
 		const _ = ( e: MXP.Entity, matrix: GLP.Matrix ) => {
 
-			let geo = e.getComponent<MXP.Geometry>( 'geometry' );
+			const geo = e.getComponent<MXP.Geometry>( 'geometry' );
 
 			if ( geo ) {
 
@@ -170,9 +183,10 @@ export class Modeler {
 
 				if ( mat ) {
 
-					geo = this.bakeTf( geo, mat.vert, mat.uniforms, { ...mat.defines } );
+					// geo = this.bakeTf( geo, mat.vert, mat.uniforms, { ...mat.defines } );
 
 				}
+
 
 				const currentIndex = posArray.length / 3;
 
@@ -204,6 +218,28 @@ export class Modeler {
 
 				}
 
+				const tangent = geo.getAttribute( 'tangent' );
+
+				if ( tangent ) {
+
+					for ( let i = 0; i < tangent.array.length; i += 4 ) {
+
+						const p = new GLP.Vector( tangent.array[ i + 0 ], tangent.array[ i + 1 ], tangent.array[ i + 2 ], 0.0 );
+						p.applyMatrix4( matrix );
+						tangentArray.push( p.x, p.y, p.z, tangent.array[ i + 3 ] );
+
+					}
+
+				} else {
+
+					for ( let i = 0; i < geo.vertCount; i ++ ) {
+
+						tangentArray.push( 0, 0, 0, 0 );
+
+					}
+
+				}
+
 				const index = geo.getAttribute( 'index' );
 
 				if ( index ) {
@@ -216,8 +252,38 @@ export class Modeler {
 
 				}
 
-			}
+				// custom attributes
 
+				const customAttributeKeys = Object.keys( customAttributes );
+
+				for ( let i = 0; i < customAttributeKeys.length; i ++ ) {
+
+					const attrName = customAttributeKeys[ i ];
+					const attrSize = customAttributes[ attrName ];
+					const attr = geo.getAttribute( attrName );
+
+					let attrArray = bakedAttributes[ attrName ];
+
+					if ( ! attrArray ) {
+
+						bakedAttributes[ attrName ] = attrArray = [];
+
+					}
+
+					if ( attr ) {
+
+						for ( let j = 0; j < attr.array.length; j += attrSize ) {
+
+							const array = [ attr.array[ j + 0 ], attr.array[ j + 1 ], attr.array[ j + 2 ], attr.array[ j + 3 ] ];
+							attrArray.push( ...array.slice( 0, attrSize ) );
+
+						}
+
+					}
+
+				}
+
+			}
 
 			e.children.forEach( c => {
 
@@ -231,8 +297,20 @@ export class Modeler {
 
 		_( entity, new GLP.Matrix() );
 
+		const attributeKeys = Object.keys( customAttributes );
+
+		for ( let i = 0; i < attributeKeys.length; i ++ ) {
+
+			const attrName = attributeKeys[ i ];
+			const attrSize = customAttributes[ attrName ];
+
+			resultGeo.setAttribute( attrName, new Float32Array( bakedAttributes[ attrName ] ), attrSize );
+
+		}
+
 		resultGeo.setAttribute( "position", new Float32Array( posArray ), 3 );
 		resultGeo.setAttribute( "normal", new Float32Array( normalArray ), 3 );
+		resultGeo.setAttribute( "tangent", new Float32Array( tangentArray ), 4 );
 		resultGeo.setAttribute( "index", new Uint32Array( indexArray ), 1 );
 
 		return resultGeo;
