@@ -1,6 +1,6 @@
 import * as GLP from 'glpower';
 import { Geometry } from '../../Component/Geometry';
-import { GLTF, GLTFBufferView, GLTFNode } from './gltf';
+import { GLTFFormat, GLTFBufferView, GLTFNode } from './gltf';
 import { Entity } from '../../Entity';
 import { Material } from '../../Component/Material';
 
@@ -44,6 +44,10 @@ const translateAttributeName = ( name: string )=> {
 
 };
 
+export type GLTF = {
+	scene: Entity;
+}
+
 export class GLTFLoader extends GLP.EventEmitter {
 
 	constructor() {
@@ -52,7 +56,7 @@ export class GLTFLoader extends GLP.EventEmitter {
 
 	}
 
-	public async load( path: string ) {
+	public async load( path: string ): Promise<GLTF> {
 
 		const res = await fetch( path );
 
@@ -64,7 +68,7 @@ export class GLTFLoader extends GLP.EventEmitter {
 
 		const buffers: Map<number, ArrayBuffer> = new Map();
 
-		let json: GLTF | null = null;
+		let json: GLTFFormat | null = null;
 
 		if ( glbMagic == "glTF" ) {
 
@@ -560,7 +564,9 @@ export class GLTFLoader extends GLP.EventEmitter {
 
 		}
 
-		return scene;
+		return {
+			scene
+		};
 
 	}
 

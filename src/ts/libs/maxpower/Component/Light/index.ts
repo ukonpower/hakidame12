@@ -51,8 +51,8 @@ export class Light extends ShadowMapCamera {
 
 		// directional
 
-		this.orthWidth = 5;
-		this.orthHeight = 5;
+		this.orthWidth = 4;
+		this.orthHeight = 4;
 
 		// spot
 

@@ -63,21 +63,11 @@ export class Scene extends GLP.EventEmitter {
 
 		this.carpenter = new Carpenter( this.root, this.camera );
 
-		blidge.on( "export_gltf", () => {
+		blidge.on( "event/export_gltf", () => {
 
 			window.location.reload();
 
 		} );
-
-		// scene
-
-		const loader = new MXP.GLTFLoader();
-
-		// loader.load( "/scene.glb" ).then( gltf => {
-
-		// 	this.root.add( gltf );
-
-		// } );
 
 		// renderer
 

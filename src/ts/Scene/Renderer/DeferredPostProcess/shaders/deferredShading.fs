@@ -61,8 +61,8 @@ void main( void ) {
 	vec4 tex3 = texture( sampler3, vUv );
 	vec4 tex4 = texture( sampler4, vUv );
 
-	float occlusion = texture( uSSAOTexture, vUv ).x;
-	
+	float occlusion = texture( uSSAOTexture, vUv ).x * 0.4;
+
 	Geometry geo = Geometry(
 		tex0.xyz,
 		tex1.xyz,

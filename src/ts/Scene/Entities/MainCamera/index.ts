@@ -109,7 +109,7 @@ export class MainCamera extends MXP.Entity {
 		this.addComponent( "controls", new OrbitControls( window.document.body ) );
 		const lookAt = this.addComponent( 'lookAt', new LookAt() );
 		this.addComponent( 'shakeViewer', new ShakeViewer( 0.1, 1.0 ) );
-		this.addComponent( "rotate", new RotateViewer( 1 ) );
+		// this.addComponent( "rotate", new RotateViewer( 1 ) );
 
 		// resolution
 
@@ -176,10 +176,6 @@ export class MainCamera extends MXP.Entity {
 					value: this.rtSSR2.textures[ 0 ],
 					type: '1i'
 				},
-				uDepthTexture: {
-					value: this.renderTarget.gBuffer.depthTexture,
-					type: '1i'
-				},
 			} ),
 			resolutionRatio: 0.5,
 			passThrough: true,
@@ -215,8 +211,8 @@ export class MainCamera extends MXP.Entity {
 			name: 'dof/coc',
 			frag: dofCoc,
 			uniforms: GLP.UniformsUtils.merge( globalUniforms.time, {
-				uDepthTex: {
-					value: this.renderTarget.gBuffer.depthTexture,
+				uGbufferPos: {
+					value: this.renderTarget.gBuffer.textures[ 0 ],
 					type: "1i"
 				},
 				uParams: {
@@ -493,9 +489,9 @@ export class MainCamera extends MXP.Entity {
 				this.colorCollection,
 				this.ssr,
 				this.ssComposite,
-				// this.dofCoc,
-				// this.dofBokeh,
-				// this.dofComposite,
+				this.dofCoc,
+				this.dofBokeh,
+				this.dofComposite,
 				// this.motionBlurTile,
 				// this.motionBlurNeighbor,
 				// this.motionBlur,
@@ -623,7 +619,6 @@ export class MainCamera extends MXP.Entity {
 
 		}
 
-
 		this.resolution.copy( resolution );
 		this.resolutionInv.set( 1.0 / resolution.x, 1.0 / resolution.y, 0.0, 0.0 );
 
@@ -640,8 +635,17 @@ export class MainCamera extends MXP.Entity {
 		this.cameraComponent.near = 0.01;
 		this.cameraComponent.far = 1000;
 		this.cameraComponent.aspect = resolution.x / resolution.y;
-		this.cameraComponent.fov = this.baseFov;// + Math.max( 0, 1 / this.cameraComponent.aspect - 1 ) * 30.0;
+		this.cameraComponent.fov = this.baseFov;// + Math.max( 0, 1 / this.cameraComponent.aspect - 1 ) * 1.0;
 		this.cameraComponent.needsUpdate = true;
+
+		const lookAt = this.getComponent<LookAt>( "lookAt" );
+
+		if ( lookAt && lookAt.target ) {
+
+			lookAt.target.position.x = - 0.1 + Math.max( 0, 1 / this.cameraComponent.aspect - 1 ) * 0.07;
+
+		}
+
 
 	}
 

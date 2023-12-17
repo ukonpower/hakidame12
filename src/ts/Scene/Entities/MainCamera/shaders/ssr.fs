@@ -25,8 +25,9 @@ in vec2 vUv;
 
 layout (location = 0) out vec4 outColor;
 
-#define MARCH 24.0
-#define LENGTH 20.0
+#define MARCH 16.0
+#define LENGTH 5.0
+#define OBJDEPTH 0.5
 
 void main( void ) {
 
@@ -34,8 +35,7 @@ void main( void ) {
 
 	vec3 rayPos = texture( uGbufferPos, vUv ).xyz;
 	vec4 rayViewPos = viewMatrix * vec4(rayPos, 1.0);
-	vec4 depthRayPos = projectionMatrixInverse * vec4( vUv * 2.0 - 1.0, texture( uDepthTexture, vUv ).x * 2.0 - 1.0, 1.0 );
-	depthRayPos.xyz /=depthRayPos.w;
+	vec4 depthRayPos = viewMatrix * vec4(rayPos, 1.0);
 
 	if( abs(rayViewPos.z - depthRayPos.z) > 0.1 || length(rayPos - cameraPosition) > 100.0 ) {
 
@@ -64,13 +64,11 @@ void main( void ) {
 		if( abs( depthCoord.x ) > 1.0 || abs( depthCoord.y ) > 1.0 ) break;
 
 		depthCoord.xy = depthCoord.xy * 0.5 + 0.5;
-		float samplerDepth = texture(uDepthTexture, depthCoord.xy).x;
 
-		vec4 rayViewPos = viewMatrix * vec4( rayPos, 1.0 );
-		vec4 depthViewPos = projectionMatrixInverse * vec4( depthCoord.xy * 2.0 - 1.0, samplerDepth * 2.0 - 1.0, 1.0 );
-		depthViewPos.xyz /= depthViewPos.w;
+		vec4 samplerPos = (viewMatrix * vec4(texture( uGbufferPos, depthCoord.xy ).xyz, 1.0));
+		vec4 sampleViewPos = viewMatrix * vec4( rayPos, 1.0 );
 
-		if( rayViewPos.z < depthViewPos.z && rayViewPos.z >= depthViewPos.z - 1.0 ) {
+		if( sampleViewPos.z < samplerPos.z && sampleViewPos.z >= samplerPos.z - OBJDEPTH ) {
 
 			col.xyz = texture( backbuffer0, depthCoord.xy ).xyz;
 			col.w = 1.0;
@@ -83,6 +81,6 @@ void main( void ) {
 
 	}
 
-	outColor = mix( texture( uSSRBackBuffer, vUv ), col, 0.3 );
+	outColor = mix( texture( uSSRBackBuffer, vUv ), col, 0.6 );
 
 }

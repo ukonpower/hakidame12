@@ -11,30 +11,21 @@ uniform vec2 uPPPixelSize;
 uniform sampler2D uNormalTexture;
 uniform sampler2D uDepthTexture;
 
+uniform float[16] uWeights;
+#define SSAOSAMPLE 16
+
 // varying
 
 in vec2 vUv;
 
+// out
+
 layout (location = 0) out vec4 outColor;
-
-#define SSAOSAMPLE 16
-
-float gauss(float x, float x0, float sx){
-    
-    float arg = x-x0;
-    arg = -1./2.*arg*arg/sx;
-    
-    float a = 1./(sqrt(2.*3.1415*sx));
-    
-    return a*exp(arg);
-}
 
 void main( void ) {
 
 	float occlusion = 0.0;
-
 	vec2 offset = vec2( uPPPixelSize );	
-	float weight = 0.0;
 
 	vec3 normalBasis = texture( uNormalTexture, vUv ).xyz;
 	float depthBasis = texture( uDepthTexture, vUv ).w;
@@ -42,36 +33,40 @@ void main( void ) {
 	float alpha = 32.0;
 	float beta = 0.25;
 
+	#ifdef IS_VIRT
+
+		vec2 direction = vec2( 0.0, 1.0 );
+	
+	#else
+
+		vec2 direction = vec2( 1.0, 0.0 );
+
+	#endif
+
+	float weight = 0.0;
+	
 	for(int i = 0; i < SSAOSAMPLE; i++){
-		
-		for(int j = 0; j < SSAOSAMPLE; j++){
 
-			vec2 offset = vec2( float( i ), float(j) );
-			offset /= float( SSAOSAMPLE );
-			offset -= 0.5;
-			offset *= uPPPixelSize * 16.0;
+		vec2 offset = float( i ) * direction;
+		offset /= float( SSAOSAMPLE );
+		offset -= direction * 0.5;
+		offset *= uPPPixelSize * 32.0;
 
-			vec2 uvOffset = vUv + offset;
+		vec2 uvOffset = vUv + offset;
 
-			float xw = float( i ) / float( SSAOSAMPLE ) - 0.5;
-			float yw = float( j ) / float( SSAOSAMPLE ) - 0.5;
+		float x = float( i ) / float( SSAOSAMPLE ) - 0.5;
 
-			vec3 normalOffset = texture( uNormalTexture, uvOffset ).xyz;
-			float depthOffset = texture( uDepthTexture, uvOffset ).w;
+		vec3 normalOffset = texture( uNormalTexture, uvOffset ).xyz;
+		float depthOffset = texture( uDepthTexture, uvOffset ).w;
 
-			float bilateralWeight = pow( ( dot( normalBasis, normalOffset ) + 1.0 ) / 2.0, alpha ) * pow( 1.0 / ( abs( depthBasis - depthOffset ) + 0.001 ), beta );
+		float bilateralWeight = pow( ( dot( normalBasis, normalOffset ) + 1.0 ) / 2.0, alpha ) * pow( 1.0 / ( abs( depthBasis - depthOffset ) + 0.001 ), beta );
 
-			float gx = gauss( xw, 0.0, 0.5 );
-			float gy = gauss( yw, 0.0, 0.5 );
+		float w = uWeights[i] * bilateralWeight;
 
-			float gw = gx * gy * bilateralWeight;
+		occlusion += texture( uSSAOTexture, uvOffset ).x * w;
 
-			occlusion += texture( uSSAOTexture, uvOffset ).x * gw;
+		weight += w;
 
-			weight += gw;
-
-		}
-		
 	}
 
 	occlusion /= weight;

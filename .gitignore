@@ -19,3 +19,5 @@ report.json
 stats.html
 
 shader_code.h
+
+*.zip

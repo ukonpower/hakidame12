@@ -1,20 +1,20 @@
 #include <common>
 
 uniform sampler2D backbuffer0;
-uniform sampler2D uDepthTex;
+uniform sampler2D uGbufferPos;
 uniform vec4 uParams;
 uniform mat4 projectionMatrixInverse;
+uniform mat4 viewMatrix;
 
 in vec2 vUv;
 
 layout (location = 0) out vec4 outColor;
 
-float sampleDepth( sampler2D depthTex, vec2 uv ) {
+float sampleDepth( sampler2D posTex, vec2 uv ) {
 
-	vec4 depth = projectionMatrixInverse * vec4( uv * 2.0 - 1.0, texture( depthTex, uv ).x * 2.0 - 1.0, 1.0 );
-	depth.xyz /= depth.w * -1.0;
+	vec4 depth = viewMatrix * vec4( texture( posTex, uv ).xyz, 1.0 );
 	
-	return depth.z;
+	return depth.z * -1.0;
 	
 }
 
@@ -40,11 +40,11 @@ void main( void ) {
 	vec3 c3 = texture(backbuffer0, vUv + duv.xy).rgb;
 
 	// Sample linear depths.
-	float d0 = sampleDepth(uDepthTex, vUv - duv.xy);
-	float d1 = sampleDepth(uDepthTex, vUv - duv.zy);
-	float d2 = sampleDepth(uDepthTex, vUv + duv.zy);
-	float d3 = sampleDepth(uDepthTex, vUv + duv.xy);
-	float d4 = sampleDepth(uDepthTex, vUv);
+	float d0 = sampleDepth(uGbufferPos, vUv - duv.xy);
+	float d1 = sampleDepth(uGbufferPos, vUv - duv.zy);
+	float d2 = sampleDepth(uGbufferPos, vUv + duv.zy);
+	float d3 = sampleDepth(uGbufferPos, vUv + duv.xy);
+	float d4 = sampleDepth(uGbufferPos, vUv);
 	vec4 depths = vec4(d4, d4, d4, d4);
 
 	// Calculate the radiuses of CoCs at these sample points.

@@ -42,17 +42,17 @@ export class Carpenter extends GLP.EventEmitter {
 
 		if ( process.env.NODE_ENV == "development" ) {
 
-			blidge.connect( 'ws://localhost:3100' );
+			blidge.connect( 'ws://localhost:3100', "/scene.glb" );
 
 			blidge.on( 'error', () => {
 
-				blidge.loadScene( SceneData as any );
+				blidge.loadScene( SceneData as any, "/scene.glb" );
 
 			} );
 
 		} else {
 
-			blidge.loadScene( SceneData as any );
+			blidge.loadScene( SceneData as any, "/scene.glb" );
 
 		}
 

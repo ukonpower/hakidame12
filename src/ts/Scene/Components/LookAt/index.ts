@@ -3,7 +3,7 @@ import * as MXP from 'maxpower';
 
 export class LookAt extends MXP.Component {
 
-	private target: MXP.Entity | null;
+	public target: MXP.Entity | null;
 
 	private up: GLP.Vector;
 	private entityWorldPos: GLP.Vector;

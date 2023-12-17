@@ -111,6 +111,9 @@ export class FrameDebugger extends GLP.EventEmitter {
 
 		} );
 
+		// this.enable = true;
+		// this.focus = 8;
+
 	}
 
 	private calcTilePos( num: number ) {
@@ -218,7 +221,7 @@ export class FrameDebugger extends GLP.EventEmitter {
 
 	}
 
-	public reflesh( ) {
+	public reflesh() {
 
 		this.resize( this.resolution );
 

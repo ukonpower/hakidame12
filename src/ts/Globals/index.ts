@@ -51,9 +51,9 @@ export const globalUniforms: {[key: string]: GLP.Uniforms} = {
 -------------------------------*/
 
 import { GPUState } from '../libs/GPUState';
-import { Pane } from 'tweakpane';
-export const gpuState: GPUState | undefined = undefined;
+export let gpuState: GPUState | undefined = undefined;
 
 import 'webgl-memory';
-// gpuState = new GPUState();
+gpuState = new GPUState();
+// gpuState = undefined;
 

@@ -22,13 +22,14 @@ uniform mat4 projectionMatrix;
 uniform mat4 projectionMatrixInverse;
 uniform vec3 cameraPosition;
 
+#define SAMPLE 16
+uniform vec3 uSSAOKernel[16];
+
 // varying
 
 in vec2 vUv;
 
 layout (location = 0) out vec4 outColor;
-
-#define SAMPLE 16
 
 void main( void ) {
 
@@ -36,49 +37,40 @@ void main( void ) {
 
 	vec3 rayPos = texture( sampler0, vUv ).xyz;
 	vec4 rayViewPos = viewMatrix * vec4(rayPos, 1.0);
-	
-	vec4 depthRayPos = projectionMatrixInverse * vec4( vUv * 2.0 - 1.0, texture( uDepthTexture, vUv ).x * 2.0 - 1.0, 1.0 );
-	depthRayPos.xyz /=depthRayPos.w;
+	vec4 depthRayPos = viewMatrix * vec4(rayPos, 1.0);
 
-	if( rayPos.x + rayPos.y + rayPos.z == 0.0 ) return;
-	if( abs( rayViewPos.z - depthRayPos.z ) > 0.1 || length(rayPos - cameraPosition) > 100.0 ) return;
+	if( rayPos.x + rayPos.y + rayPos.z == 0.0 || length(rayPos - cameraPosition) > 100.0 ) return;
 
 	vec3 normal = texture( sampler1, vUv ).xyz;
 	float occlusion = 0.0;
 
-	float dist = 0.6;
-	float objectDepth = 0.5;
+	float dist = 0.25;
+	float objectDepth = 0.2;
+
+	vec2 seed = vUv + uFractTime;
+	vec3 random = vec3( random( vec2( seed ) ), random( vec2( seed + 0.25 ) ), random( vec2( seed + 0.5 ) ) ) * 2.0 - 1.0;
+
+	vec3 tangent = normalize(random - normal * dot(random,normal));
+	vec3 bitangent = cross( tangent, normal );
+	mat3 kernelMatrix = mat3(tangent, bitangent, normal);
 
 	for( int i = 0; i < SAMPLE; i ++ ) {
 
-		float seed = uFractTime * 0.0 + float( i );
-		vec3 noise = vec3( random( vUv + seed * 1.234 ), random( vUv - seed * 2.456 ), random( vUv + seed ) * 0.95 + 0.05 );
-	
-		float r = sqrt( noise.x );
-		float theta = TPI * noise.y;
-		vec3 tDir = vec3( r * cos( theta ), r * sin( theta ), sqrt( 1.0 - noise.x ) );
-
-		tDir.y += 0.1;
-		tDir = normalize( tDir );
-
-		vec3 tangent = normalize( cross( normal, abs( normal.x ) > 0.001 ? vec3( 0.0, 1.0, 0.0 ) : vec3( 1.0, 0.0, 0.0 ) ) );
-		vec3 binormal = cross( tangent, normal );
+		float seed = uFractTime * 1.0 + float( i );
 		
-		vec3 sampleOffset = (tangent * tDir.x + binormal * tDir.y + normal * tDir.z) * noise.z * dist;
-		vec3 samplePos = rayPos + sampleOffset;
+		vec3 sampleOffset = kernelMatrix * uSSAOKernel[i];
+		vec3 samplePos = rayPos + sampleOffset * dist;
 
 		vec4 depthCoord = (projectionMatrix * viewMatrix * vec4( samplePos, 1.0 ) );
 		depthCoord.xy /= depthCoord.w;
 		depthCoord.xy = depthCoord.xy * 0.5 + 0.5;
 
-		float samplerDepth = texture(uDepthTexture, depthCoord.xy).x;
+		vec4 samplerPos = (viewMatrix * vec4(texture( sampler0, depthCoord.xy ).xyz, 1.0));
 		vec4 sampleViewPos = viewMatrix * vec4( samplePos, 1.0 );
-		vec4 depthViewPos = projectionMatrixInverse * vec4( depthCoord.xy * 2.0 - 1.0, samplerDepth * 2.0 - 1.0, 1.0 );
-		depthViewPos.xyz /= depthViewPos.w;
 
-		if( sampleViewPos.z < depthViewPos.z && sampleViewPos.z >= depthViewPos.z - 1.0 ) {
+		if( sampleViewPos.z < samplerPos.z && sampleViewPos.z >= samplerPos.z - objectDepth ) {
 
-			occlusion += pow( 1.0 - noise.z, 2.0 );
+			occlusion += 1.0 - pow( length( sampleOffset ), 2.0);
 
 		}
 		
@@ -86,7 +78,6 @@ void main( void ) {
 
 	occlusion /= float( SAMPLE );
 
-
-	outColor = vec4( mix( texture( uSSAOBackBuffer, vUv ).xyz, vec3( occlusion ), 0.6 ), 1.0 );
+	outColor = vec4( mix( texture( uSSAOBackBuffer, vUv ).xyz, vec3( occlusion ), 0.4 ), 1.0 );
 
 }

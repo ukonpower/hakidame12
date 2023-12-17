@@ -14,29 +14,29 @@ import { power } from '~/ts/Globals';
 
 let PlantParam = {
 	root: {
-		num: { value: 3, min: 0, max: 10, step: 1 },
-		up: { value: 0.6, min: 0, max: 1, step: 0.01 }
+		num: { value: 2, min: 0, max: 10, step: 1 },
+		up: { value: 0.92, min: 0, max: 1, step: 0.01 }
 	},
 	branch: {
-		num: { value: 2, min: 0, max: 10, step: 1 },
-		depth: { value: 4, min: 0, max: 5, step: 1 },
-		start: { value: 0.3, min: 0, max: 1, step: 0.01 },
-		end: { value: 0.8, min: 0, max: 1, step: 0.01 },
-		up: { value: 0.4, min: - 1, max: 1, step: 0.01 },
+		num: { value: 3, min: 0, max: 10, step: 1 },
+		depth: { value: 3, min: 0, max: 5, step: 1 },
+		start: { value: 0.23, min: 0, max: 1, step: 0.01 },
+		end: { value: 0.48, min: 0, max: 1, step: 0.01 },
+		up: { value: 0.20, min: - 1, max: 1, step: 0.01 },
 		wide: { value: 1.0, min: 0, max: 1, step: 0.01 },
-		curve: { value: 0.5, min: - 1, max: 1, step: 0.01 },
-		lengthMultiplier: { value: 0.6, min: 0, max: 2, step: 0.01 },
-		lengthRandom: { value: 0.5, min: 0, max: 1, step: 0.01 },
+		curve: { value: 0.91, min: - 1, max: 1, step: 0.01 },
+		lengthMultiplier: { value: 0.48, min: 0, max: 2, step: 0.01 },
+		lengthRandom: { value: 0.28, min: 0, max: 1, step: 0.01 },
 	},
 	shape: {
-		length: { value: 0.5, min: 0, max: 2, step: 0.01 },
-		radius: { value: 0.015, min: 0, max: 0.05, step: 0.001 },
+		length: { value: 0.72, min: 0, max: 2, step: 0.01 },
+		radius: { value: 0.005, min: 0, max: 0.05, step: 0.001 },
 	},
 	leaf: {
-		size: { value: 0.4, min: 0, max: 1, step: 0.01 },
+		size: { value: 0.59, min: 0, max: 1, step: 0.01 },
 		dpeth: { value: 1, min: 0, max: 5, step: 1 },
 	},
-	seed: { value: 0, min: 0, max: 9999, step: 1 }
+	seed: { value: 4456, min: 0, max: 9999, step: 1 }
 };
 
 const local = localStorage.getItem( "plant" );
@@ -227,7 +227,7 @@ export class Plant extends MXP.Entity {
 
 		loader.load( "/scene.glb" ).then( gltf => {
 
-			const leaf = gltf.getEntityByName( "Leaf" );
+			const leaf = gltf.scene.getEntityByName( "Leaf" );
 
 			this.leaf = leaf!;
 

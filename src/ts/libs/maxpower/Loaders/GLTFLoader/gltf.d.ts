@@ -1,4 +1,4 @@
-export interface GLTF {
+export interface GLTFFormat {
     asset?: GLTFAsset;
     scene?: number;
     scenes?: GLTFScene[];

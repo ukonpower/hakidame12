@@ -11,7 +11,6 @@ import { CylinderGeometry } from "../Geometry/CylinderGeometry";
 import { Geometry } from "../Geometry";
 import { PlaneGeometry } from "../Geometry/PlaneGeometry";
 
-
 export class BLidger extends Component {
 
 	private blidge: BLidge;
@@ -133,6 +132,34 @@ export class BLidger extends Component {
 				geometry.setAttribute( 'normal', geometryParam.normal, 3 );
 				geometry.setAttribute( 'index', geometryParam.index, 3 );
 				entity.addComponent( 'geometry', geometry );
+
+			} else if ( this.node.type == 'gltf' ) {
+
+				this.blidge.gltfPrm.then( gltf => {
+
+					const gltfEntity = gltf.scene.getEntityByName( this.node.name );
+
+					if ( gltfEntity ) {
+
+						const geo = gltfEntity.getComponent<Geometry>( "geometry" );
+
+						if ( geo ) {
+
+							entity.addComponent( 'geometry', geo );
+
+						}
+
+						const mat = gltfEntity.getComponent<Material>( "material" );
+
+						if ( mat ) {
+
+							entity.addComponent( 'material', mat );
+
+						}
+
+					}
+
+				} );
 
 			}
 

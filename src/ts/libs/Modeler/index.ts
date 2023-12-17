@@ -175,7 +175,7 @@ export class Modeler {
 
 		const _ = ( e: MXP.Entity, matrix: GLP.Matrix ) => {
 
-			const geo = e.getComponent<MXP.Geometry>( 'geometry' );
+			let geo = e.getComponent<MXP.Geometry>( 'geometry' );
 
 			if ( geo ) {
 

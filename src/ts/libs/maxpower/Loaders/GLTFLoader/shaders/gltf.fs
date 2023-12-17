@@ -103,6 +103,7 @@ void main( void ) {
 	#endif
 
 	#ifdef USE_NORMAL_MAP 
+	
 		#ifdef USE_TANGENT
 
 		vec3 tangent = normalize( vTangent );
@@ -119,10 +120,11 @@ void main( void ) {
 		
 		vec3 mapN = texture( uNormalMap, mapUv ).xyz;
 		mapN = mapN * 2.0 - 1.0;
+		
 		outNormal = normalize( vTBN * mapN );
 
 		#endif
-		
+
 	#endif
 
 	#ifdef USE_METALNESS

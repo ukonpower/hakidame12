@@ -93,6 +93,8 @@ class App {
 
 	}
 
+	private beforeDate?: number;
+
 	private animate() {
 
 		if ( gpuState ) {
@@ -101,7 +103,17 @@ class App {
 
 		}
 
+		this.beforeDate = new Date().getTime();
+
 		this.scene.update();
+
+		if ( gpuState ) {
+
+			const current = new Date().getTime();
+			gpuState.setRenderTime( "cpuTotal", ( current - ( this.beforeDate || 0 ) ) );
+			this.beforeDate = current;
+
+		}
 
 		window.requestAnimationFrame( this.animate.bind( this ) );
 
@@ -114,10 +126,7 @@ class App {
 		let scale = canvasAspect < 1.0 ? Math.min( 1.5, window.devicePixelRatio ) : 1.0;
 
 		scale *= 1.0;
-		// scale *= 0.4;
-
-		// const blkRatioX = canvasAspect < 1.0 ? 0.9 : 0.95;
-		// const blkRatioY = canvasAspect < 1.0 ? 0.9 : 0.95;
+		// scale *= 0.5;
 
 		const blkRatioX = 1.0;
 		const blkRatioY = 1.0;
