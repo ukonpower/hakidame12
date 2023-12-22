@@ -15,3 +15,11 @@ declare module '*.fs'{
 	const value: string;
 	export default value;
 }
+
+
+export {};
+
+declare global {
+	const BASE_PATH: string;
+}
+

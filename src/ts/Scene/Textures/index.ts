@@ -18,31 +18,4 @@ export const createTextures = () => {
 		type: '1i'
 	};
 
-	const prms = [
-		'/env/px.png',
-		'/env/py.png',
-		'/env/pz.png',
-		'/env/nx.png',
-		'/env/ny.png',
-		'/env/nz.png'
-	].map( path => new Promise<HTMLImageElement>( ( r )=> {
-
-		const img = document.createElement( "img" );
-
-		img.onload = () => {
-
-			r( img );
-
-		};
-
-		img.src = path;
-
-	} ) );
-
-	Promise.all( prms ).then( imgs => {
-
-		globalUniforms.tex.uEnvTex.value.attach( imgs );
-
-	} );
-
 };

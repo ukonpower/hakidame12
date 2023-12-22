@@ -2,33 +2,14 @@ import path from 'path';
 import { defineConfig } from 'vite';
 import { visualizer } from 'rollup-plugin-visualizer';
 import shaderminifier from './plugins/shader-minifier-loader';
-import image from '@rollup/plugin-image';
+import config from './config';
 
-const pageList = [
-	{ name: 'index', path: '/' },
-];
-
-const input = {
-	...( () => {
-
-		const exEntryList = {};
-
-		pageList.forEach( ( page ) => {
-
-			exEntryList[ page.name || page.path ] = path.resolve( __dirname, 'src/', page.path, '/index.html' );
-
-		} );
-
-		return exEntryList;
-
-	} )(),
-};
-
-const basePath = '/';
+const basePath = `/${config.no}/`;
 
 export default defineConfig( {
 	root: 'src',
 	publicDir: 'public',
+	base: basePath,
 	server: {
 		port: 3000,
 		host: "0.0.0.0",

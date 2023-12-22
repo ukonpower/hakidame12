@@ -225,7 +225,7 @@ export class Plant extends MXP.Entity {
 
 		const loader = new MXP.GLTFLoader();
 
-		loader.load( "/scene.glb" ).then( gltf => {
+		loader.load( BASE_PATH + "/scene.glb" ).then( gltf => {
 
 			const leaf = gltf.scene.getEntityByName( "Leaf" );
 
