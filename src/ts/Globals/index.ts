@@ -55,5 +55,5 @@ export let gpuState: GPUState | undefined = undefined;
 
 import 'webgl-memory';
 gpuState = new GPUState();
-// gpuState = undefined;
+gpuState = undefined;
 
