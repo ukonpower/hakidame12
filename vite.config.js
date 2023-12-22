@@ -37,14 +37,13 @@ export default defineConfig( {
 		}
 	},
 	build: {
+		outDir: '../public/',
 		minify: 'terser',
 		rollupOptions: {
-			input,
-			output: {
-				dir: './public',
-				entryFileNames: 'index.js'
-			}
-		},
+			input: {
+				index: path.resolve( __dirname, 'src/index.html' ),
+			},
+		}
 	},
 	resolve: {
 		alias: {
@@ -54,10 +53,6 @@ export default defineConfig( {
 		},
 	},
 	plugins: [
-		{
-			...image(),
-			enforce: "pre"
-		},
 		{
 			...shaderminifier(),
 			enforce: 'pre'

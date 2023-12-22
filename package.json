@@ -1,15 +1,13 @@
 {
 	"private": true,
-	"name": "demo",
+	"name": "12.hakidame",
 	"version": "0.0.1",
 	"description": "",
 	"author": "ukonpower",
 	"license": "MIT",
 	"scripts": {
 		"dev": "vite",
-		"build:js": "vite build",
-		"build:png": "jsexe.exe -po -cn ./public/index.js ./public/set-a.html",
-		"build": "npm run build:js && npm run build:png"
+		"build": "vite build && cp -rf ./public/. ../hakidame/src/public/12/ && cp ./config.json ../hakidame/src/public/12/"
 	},
 	"workspaces": [
 		"packages/*"
